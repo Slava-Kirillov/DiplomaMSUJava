@@ -1,4 +1,4 @@
-package ru.diploma.math.complex;
+package ru.diploma.data.complex;
 
 import java.util.Objects;
 

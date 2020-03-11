@@ -1,23 +1,32 @@
-package ru.diploma.util;
+package ru.diploma.service;
 
+import org.springframework.stereotype.Component;
+import ru.diploma.config.ApplicationConfig;
 import ru.diploma.error.DataReadException;
 
 import java.io.*;
 
-public class IOUtils {
+@Component
+public class IOService {
+
+    private ApplicationConfig config;
+
+    public IOService(ApplicationConfig applicationConfig) {
+        this.config = applicationConfig;
+    }
 
     /**
      * Метод возвращает многомерный массив, в котором содержатся координаты точек ячеек,
      * на которые разбит исследуемый объект
-     * @param numberOfPointsPerCell
-     * @param numberOfCoordinatesPerPoint
      * @return
      * @throws IOException
      * @throws DataReadException
      */
-    public static float[][][] getArrayOfCells(int numberOfPointsPerCell,
-                                              int numberOfCoordinatesPerPoint) throws IOException, DataReadException {
-        File file = new File("src/main/resources/data/sphere_30_50.dat");
+    public float[][][] getArrayOfCellsFromFile() throws IOException, DataReadException {
+        File file = new File("src/main/resources/data/" + config.getDataFile());
+
+        int numberOfPointsPerCell = config.getNumPoints();
+        int numberOfCoordinatesPerPoint = config.getNumCoordinatePoint();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
@@ -41,10 +50,12 @@ public class IOUtils {
 
             if (numberOfCells != 0) {
                 float[][][] arrayOfCell = new float[numberOfCells][numberOfPointsPerCell][numberOfCoordinatesPerPoint];
-                for (int i = 0; i < numberOfCells - 1; i++) { // (- 1) так как первая строка с ячейкой была прочитана в цикле while
-                    line = reader.readLine();
-                    lineCount++;
-                    numbers = line.split(" ");
+                for (int i = 0; i < numberOfCells; i++) { // (- 1) так как первая строка с ячейкой была прочитана в цикле while
+                    if (i != 0) {
+                        line = reader.readLine();
+                        lineCount++;
+                        numbers = line.split(" ");
+                    }
                     if (numbers.length == numberOfPointsPerCell * numberOfCoordinatesPerPoint) {
                         for (int j = 0; j < numberOfPointsPerCell; j++) {
                             for (int k = 0; k < numberOfCoordinatesPerPoint; k++) {
