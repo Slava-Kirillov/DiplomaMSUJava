@@ -44,9 +44,9 @@ public class DataGenService {
         int numPointsCell = config.getNumPoints();
         int numCoordinatesPoint = config.getNumCoordinatePoint();
 
-        float[][] normal = new float[numPointsCell][numCoordinatesPoint];
-        float[][] tau1 = new float[numPointsCell][numCoordinatesPoint];
-        float[][] tau2 = new float[numPointsCell][numCoordinatesPoint];
+        float[][] normal = new float[cells.length][numCoordinatesPoint];
+        float[][] tau1 = new float[cells.length][numCoordinatesPoint];
+        float[][] tau2 = new float[cells.length][numCoordinatesPoint];
 
         CellVectors cellVectors = new CellVectors(normal, tau1, tau2);
 
@@ -59,7 +59,7 @@ public class DataGenService {
 
             for (int j = 0; j < numCoordinatesPoint; j++) {
                 normal[i][j] = vecMultip[j] / vecMultipNorma;
-                tau1[i][j] = diagonals.getDiag1()[i] / diag1Norma;
+                tau1[i][j] = diagonals.getDiag1()[j] / diag1Norma;
             }
             tau2[i] = getVecMultip(normal[i], tau1[i]);
         }

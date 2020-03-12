@@ -18,4 +18,7 @@ public class ApplicationConfig {
 
     @Value("${cell.point.coordinates}")
     private int numCoordinatePoint;
+
+    @Value("${write.result.to.file}")
+    private boolean writeResults;
 }
