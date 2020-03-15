@@ -6,6 +6,10 @@ import java.io.*;
 
 public class IOUtil {
 
+    /**
+     * Вычисление площади фигуры по площади ячеек и вывод ркзультата в консоль
+     * @param cellArea
+     */
     public static void printFigureArea(float[] cellArea) {
         double area = 0;
         for (float v : cellArea) {
@@ -16,6 +20,13 @@ public class IOUtil {
         System.out.println(String.format("Разность: %f", Math.abs(area - Math.PI * 4)));
     }
 
+    /**
+     * Вывод результата формирования даныых для расчета в файйл
+     * @param cellArea
+     * @param collocationPoints
+     * @param cells
+     * @param cellVectors
+     */
     public static void writeAllResultToFiles(float[] cellArea,
                                              float[][] collocationPoints,
                                              float[][][] cells,
@@ -30,7 +41,7 @@ public class IOUtil {
     }
 
     /**
-     * Печать результата в файл
+     * Вывод массива в файл
      */
     private static <T> void writeResultToFile(String fileName, T data, int dimensional, int numberOfLine) {
         File fileDir = new File("src/main/resources/data/" + fileName);

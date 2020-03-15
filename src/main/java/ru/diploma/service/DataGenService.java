@@ -40,6 +40,11 @@ public class DataGenService {
         return arrayOfCollocationPoints;
     }
 
+    /**
+     *
+     * @param cells
+     * @return
+     */
     public CellVectors getCellVectors(float[][][] cells) {
         int numPointsCell = config.getNumPoints();
         int numCoordinatesPoint = config.getNumCoordinatePoint();
