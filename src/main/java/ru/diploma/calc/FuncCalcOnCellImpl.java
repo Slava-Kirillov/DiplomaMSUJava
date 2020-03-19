@@ -71,10 +71,6 @@ public class FuncCalcOnCellImpl {
     }
 
     private static float[] subtractVectors(float[] x, float[] y) {
-        return new float[]{
-                x[0] - y[0],
-                x[1] - y[1],
-                x[2] - y[2]
-        };
+        return new float[]{x[0] - y[0], x[1] - y[1], x[2] - y[2]};
     }
 }
