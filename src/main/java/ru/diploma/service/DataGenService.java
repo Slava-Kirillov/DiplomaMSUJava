@@ -20,9 +20,7 @@ public class DataGenService {
      * @param cells
      * @return
      */
-    public float[][] getCollocationPoints(float[][][] cells) {
-        int numPointsCell = config.getNumPoints();
-        int numCoordinatesPoint = config.getNumCoordinatePoint();
+    public static float[][] getCollocationPoints(float[][][] cells, int numPointsCell, int numCoordinatesPoint) {
 
         float[][] arrayOfCollocationPoints = new float[cells.length][numCoordinatesPoint];
         float coordinate = 0;
@@ -46,7 +44,6 @@ public class DataGenService {
      * @return
      */
     public CellVectors getCellVectors(float[][][] cells) {
-        int numPointsCell = config.getNumPoints();
         int numCoordinatesPoint = config.getNumCoordinatePoint();
 
         float[][] normal = new float[cells.length][numCoordinatesPoint];
@@ -56,9 +53,9 @@ public class DataGenService {
         CellVectors cellVectors = new CellVectors(normal, tau1, tau2);
 
         for (int i = 0; i < cells.length; ++i) {
-            CellDiagonals diagonals = getDiagOfCell(cells[i]);
+            CellDiagonals diagonals = getDiagOfCell(cells[i], config.getNumCoordinatePoint());
 
-            float[] vecMultip = getVecMultip(diagonals.getDiag1(), diagonals.getDiag2());
+            float[] vecMultip = getVecMultip(diagonals.getDiag1(), diagonals.getDiag2(), numCoordinatesPoint);
             float vecMultipNorma = getVectorNorma(vecMultip);
             float diag1Norma = getVectorNorma(diagonals.getDiag1());
 
@@ -66,7 +63,7 @@ public class DataGenService {
                 normal[i][j] = vecMultip[j] / vecMultipNorma;
                 tau1[i][j] = diagonals.getDiag1()[j] / diag1Norma;
             }
-            tau2[i] = getVecMultip(normal[i], tau1[i]);
+            tau2[i] = getVecMultip(normal[i], tau1[i], numCoordinatesPoint);
         }
         return cellVectors;
     }
@@ -77,12 +74,12 @@ public class DataGenService {
      * @param vector
      * @return
      */
-    float getVectorNorma(float[] vector) {
+    public static float getVectorNorma(float[] vector) {
         return (float) Math.sqrt(Math.pow(vector[0], 2) + Math.pow(vector[1], 2) + Math.pow(vector[2], 2));
     }
 
-    private float[] getVecMultip(float[] vector1, float[] vector2) {
-        float[] vecMultip = new float[config.getNumCoordinatePoint()];
+    public static float[] getVecMultip(float[] vector1, float[] vector2, int vecDim) {
+        float[] vecMultip = new float[vecDim];
         vecMultip[0] = vector1[1] * vector2[2] - vector1[2] * vector2[1];
         vecMultip[1] = vector1[2] * vector2[0] - vector1[0] * vector2[2];
         vecMultip[2] = vector1[0] * vector2[1] - vector1[1] * vector2[0];
@@ -95,17 +92,17 @@ public class DataGenService {
      * @param cells
      * @return
      */
-    public float[] getCellArea(float[][][] cells) {
+    public static float[] getCellArea(float[][][] cells, int numCoordPoints) {
         float[] arrayOfCellArea = new float[cells.length];
 
         for (int i = 0; i < cells.length; ++i) {
-            arrayOfCellArea[i] = getCellArea(cells[i]);
+            arrayOfCellArea[i] = getCellArea(cells[i], numCoordPoints);
         }
         return arrayOfCellArea;
     }
 
-    private float getCellArea(float[][] cell) {
-        CellDiagonals diagonals = getDiagOfCell(cell);
+    private static float getCellArea(float[][] cell, int numCoordPoints) {
+        CellDiagonals diagonals = getDiagOfCell(cell, numCoordPoints);
         float[] diag1 = diagonals.getDiag1();
         float[] diag2 = diagonals.getDiag2();
 
@@ -117,15 +114,13 @@ public class DataGenService {
                 Math.sqrt(1 - Math.pow((scalarMultDiag1Diag2 / (diag1Length * diag2Length)), 2)) / 2);
     }
 
-    private CellDiagonals getDiagOfCell(float[][] cell) {
-        int numPointsCell = config.getNumPoints();
-        int numCoordinatesPoint = config.getNumCoordinatePoint();
+    public static CellDiagonals getDiagOfCell(float[][] cell, int numCoordPoints) {
 
         CellDiagonals diagonals = new CellDiagonals();
-        float[] diag1 = new float[numCoordinatesPoint];
-        float[] diag2 = new float[numCoordinatesPoint];
+        float[] diag1 = new float[numCoordPoints];
+        float[] diag2 = new float[numCoordPoints];
 
-        for (int i = 0; i < numCoordinatesPoint; i++) {
+        for (int i = 0; i < numCoordPoints; i++) {
             diag1[i] = cell[0][i] - cell[2][i];
             diag2[i] = cell[1][i] - cell[3][i];
         }

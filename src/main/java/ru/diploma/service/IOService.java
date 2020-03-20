@@ -1,7 +1,5 @@
 package ru.diploma.service;
 
-import org.springframework.stereotype.Component;
-import ru.diploma.config.ApplicationConfig;
 import ru.diploma.error.DataReadException;
 
 import java.io.BufferedReader;
@@ -9,14 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-@Component
 public class IOService {
-
-    private ApplicationConfig config;
-
-    public IOService(ApplicationConfig applicationConfig) {
-        this.config = applicationConfig;
-    }
 
     /**
      * Метод возвращает многомерный массив, в котором содержатся координаты точек ячеек,
@@ -25,11 +16,10 @@ public class IOService {
      * @throws IOException
      * @throws DataReadException
      */
-    public float[][][] getArrayOfCellsFromFile() throws IOException, DataReadException {
-        File file = new File("src/main/resources/data/" + config.getDataFile());
-
-        int numberOfPointsPerCell = config.getNumPoints();
-        int numberOfCoordinatesPerPoint = config.getNumCoordinatePoint();
+    public static float[][][] getArrayOfCellsFromFile(String dataFile,
+                                                      int numPoints,
+                                                      int numCoordPoints) throws IOException, DataReadException {
+        File file = new File("src/main/resources/data/" + dataFile);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
@@ -42,7 +32,7 @@ public class IOService {
             while ((line = reader.readLine()) != null) {
                 lineCount++;
                 numbers = line.split(" ");
-                if (numbers.length < numberOfPointsPerCell * numberOfCoordinatesPerPoint) {
+                if (numbers.length < numPoints * numCoordPoints) {
                     if (lineCount == 4) {
                         numberOfCells = Integer.parseInt(numbers[0]);
                     }
@@ -52,17 +42,17 @@ public class IOService {
             }
 
             if (numberOfCells != 0) {
-                float[][][] arrayOfCell = new float[numberOfCells][numberOfPointsPerCell][numberOfCoordinatesPerPoint];
+                float[][][] arrayOfCell = new float[numberOfCells][numPoints][numCoordPoints];
                 for (int i = 0; i < numberOfCells; i++) { // (- 1) так как первая строка с ячейкой была прочитана в цикле while
                     if (i != 0) {
                         line = reader.readLine();
                         lineCount++;
                         numbers = line.split(" ");
                     }
-                    if (numbers.length == numberOfPointsPerCell * numberOfCoordinatesPerPoint) {
-                        for (int j = 0; j < numberOfPointsPerCell; j++) {
-                            for (int k = 0; k < numberOfCoordinatesPerPoint; k++) {
-                                int index = k + j * numberOfCoordinatesPerPoint;
+                    if (numbers.length == numPoints * numCoordPoints) {
+                        for (int j = 0; j < numPoints; j++) {
+                            for (int k = 0; k < numCoordPoints; k++) {
+                                int index = k + j * numCoordPoints;
                                 arrayOfCell[i][j][k] = Float.parseFloat(numbers[index]);
                             }
                         }

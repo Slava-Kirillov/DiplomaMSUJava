@@ -43,7 +43,7 @@ public class IOUtil {
     /**
      * Вывод массива в файл
      */
-    private static <T> void writeResultToFile(String fileName, T data, int dimensional, int numberOfLine) {
+    public static <T> void writeResultToFile(String fileName, T data, int dimensional, int numberOfLine) {
         File fileDir = new File("src/main/resources/data/" + fileName);
         try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
             StringBuilder stringBuilder = new StringBuilder();

@@ -6,26 +6,29 @@ import ru.diploma.data.CellVectors;
 import ru.diploma.error.DataReadException;
 import ru.diploma.util.IOUtil;
 
-import java.io.*;
+import java.io.IOException;
 
 @Component
 public class ProcessingService {
 
     private DataGenService dataGenService;
-    private IOService ioService;
     private ApplicationConfig config;
 
-    public ProcessingService(DataGenService dataGenService, IOService ioService, ApplicationConfig config) {
+    public ProcessingService(DataGenService dataGenService, ApplicationConfig config) {
         this.dataGenService = dataGenService;
-        this.ioService = ioService;
         this.config = config;
     }
 
     public void runProcessing() {
         try {
-            float[][][] cells = ioService.getArrayOfCellsFromFile();
-            float[][] collocationPoint = dataGenService.getCollocationPoints(cells);
-            float[] cellArea = dataGenService.getCellArea(cells);
+            float[][][] cells = IOService.getArrayOfCellsFromFile(config.getDataFile(),
+                    config.getNumPoints(),
+                    config.getNumCoordinatePoint());
+
+            float[][] collocationPoint = DataGenService.getCollocationPoints(cells,
+                    config.getNumPoints(),
+                    config.getNumCoordinatePoint());
+            float[] cellArea = DataGenService.getCellArea(cells, config.getNumCoordinatePoint());
             CellVectors cellVectors = dataGenService.getCellVectors(cells);
 
             if (config.isWriteResults()) {
