@@ -20,23 +20,7 @@ public class CellIntegralCalc {
     }
 
     /**
-     * Вычисление оператора R[sigma, tau]
-     */
-    public static ComplexVector operatorCalc(float[] x,
-                                             float[][] cell,
-                                             float eps,
-                                             Complex k,
-                                             int m,
-                                             ComplexVector tau,
-                                             int vecDim)
-            throws DataValidationException {
-        ComplexVector f = cellIntegralCalculation(x, cell, eps, k, m, FuncCalcOnCellImpl::funcDefOnCell, vecDim);
-
-        return f;
-    }
-
-    /**
-     * Вычисдение интеграла по одной ячейке, с разбиением ячейки на m*m частей
+     * Вычисление интеграла по одной ячейке, с разбиением ячейки на m*m частей
      *
      * @param x    - точка, в которой ищется результат
      * @param cell - ячейка, на которой считается инткграл
@@ -89,8 +73,6 @@ public class CellIntegralCalc {
                 float[] rn = DataGenService.getVecMultip(m1, m2, vecDim);
 
                 s = (float) Math.sqrt(Math.pow(rn[0], 2) + Math.pow(rn[1], 2) + Math.pow(rn[2], 2));
-
-                System.out.println(s);
 
                 s_sum += s;
                 sub_cell_count++;

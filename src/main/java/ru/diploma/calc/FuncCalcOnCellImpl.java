@@ -16,7 +16,7 @@ public class FuncCalcOnCellImpl {
             throw new DataValidationException("Vectors have incorrect format");
         }
 
-        ComplexVector funcV = funcV(x, eps, k, y);
+        ComplexVector funcV = funcV(x, k, y);
         float tetaEps = funcTetaEps(x, y, eps);
 
         return ComplexVector.multiply(tetaEps, funcV);
@@ -41,7 +41,7 @@ public class FuncCalcOnCellImpl {
         return 0;
     }
 
-    private static ComplexVector funcV(float[] x, float eps, Complex k, float[] y) {
+    private static ComplexVector funcV(float[] x, Complex k, float[] y) {
         float r = getLengthRadiusVec(x, y);
         Complex a1 = new Complex(-k.getIm() * r, k.getRe() * r);
         Complex a2 = Complex.exp(a1);

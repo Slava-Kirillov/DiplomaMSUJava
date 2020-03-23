@@ -1,6 +1,5 @@
 package ru.diploma.calc;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.diploma.data.CellDiagonals;
 import ru.diploma.data.complex.Complex;
@@ -46,7 +45,6 @@ public class CellIntgralCalcTest {
         int m = 5;
 
         for (int i = 0; i < cells.length; i++) {
-            if (i == 600) {
                 CellIntegralCalc.cellIntegralCalculation(coll_points[i],
                         cells[i],
                         eps,
@@ -54,7 +52,6 @@ public class CellIntgralCalcTest {
                         m,
                         FuncCalcOnCellImpl::funcDefOnCell,
                         numCoordinates);
-            }
         }
     }
 }
