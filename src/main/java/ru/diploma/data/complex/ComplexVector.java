@@ -28,12 +28,45 @@ public class ComplexVector {
         );
     }
 
+    /**
+     * Умножние вектора на число
+     * @param num
+     * @param vector
+     * @return
+     */
     public static ComplexVector multiply(float num, ComplexVector vector) {
         return new ComplexVector(
                 Complex.multiply(num, vector.getCoordinates()[0]),
                 Complex.multiply(num, vector.getCoordinates()[1]),
                 Complex.multiply(num, vector.getCoordinates()[2])
         );
+    }
+
+    public static Complex scalarMultiply(float[] realVec1, ComplexVector vec2) {
+        ComplexVector vec1 = new ComplexVector(
+                new Complex(realVec1[0], 0),
+                new Complex(realVec1[1], 0),
+                new Complex(realVec1[2], 0)
+        );
+        return scalarMultiply(vec1, vec2);
+    }
+
+    /**
+     * скалярное произведение в унитарном пространстве (линейное пространство над полем комплексных чисел)
+     * @param vec1
+     * @param vec2
+     * @return
+     */
+    public static Complex scalarMultiply(ComplexVector vec1, ComplexVector vec2) {
+        Complex[] coordVec1 = vec1.getCoordinates();
+        Complex[] coordVec2 = vec2.getCoordinates();
+
+        Complex sum = new Complex();
+
+        for (int i = 0; i < coordVec1.length; i++) {
+            sum.add(Complex.multiply(coordVec1[i], coordVec2[i].conjugate()));
+        }
+        return sum;
     }
 
     /**

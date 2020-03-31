@@ -35,6 +35,8 @@ public class ProcessingService {
                 IOUtil.writeAllResultToFiles(cellArea, collocationPoint, cells, cellVectors);
                 IOUtil.printFigureArea(cellArea);
             }
+
+
         } catch (DataReadException | IOException e) {
             e.printStackTrace();
         }
