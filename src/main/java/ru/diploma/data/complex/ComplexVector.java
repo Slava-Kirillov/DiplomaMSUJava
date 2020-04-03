@@ -20,21 +20,44 @@ public class ComplexVector {
         this.coordinates = new Complex[]{x1, x2, x3};
     }
 
-    public static ComplexVector vecMultiply(ComplexVector vec1, ComplexVector vec2) {
-        Complex[] coordVec1 = vec1.getCoordinates();
-        Complex[] coordVec2 = vec2.getCoordinates();
-        return new ComplexVector(
+    public ComplexVector(float x1_real, float x2_real, float x3_real) {
+        Complex x1 = new Complex(x1_real, 0.0f);
+        Complex x2 = new Complex(x2_real, 0.0f);
+        Complex x3 = new Complex(x3_real, 0.0f);
+        this.coordinates = new Complex[]{x1, x2, x3};
+    }
 
+    public static ComplexVector vecMultiply(ComplexVector vec1, ComplexVector vec2) {
+        Complex[] a = vec1.getCoordinates();
+        Complex[] b = vec2.getCoordinates();
+        return new ComplexVector(
+                Complex.subtract(Complex.multiply(a[1], b[2]), Complex.multiply(a[2], b[1])),
+                Complex.subtract(Complex.multiply(a[2], b[0]), Complex.multiply(a[0], b[2])),
+                Complex.subtract(Complex.multiply(a[0], b[1]), Complex.multiply(a[1], b[0]))
         );
     }
 
     /**
-     * Умножние вектора на число
+     * Умножние комплексного вектора на действительное число
      * @param num
      * @param vector
      * @return
      */
     public static ComplexVector multiply(float num, ComplexVector vector) {
+        return new ComplexVector(
+                Complex.multiply(num, vector.getCoordinates()[0]),
+                Complex.multiply(num, vector.getCoordinates()[1]),
+                Complex.multiply(num, vector.getCoordinates()[2])
+        );
+    }
+
+    /**
+     * Умножние комплексного вектора на комплексное число
+     * @param num
+     * @param vector
+     * @return
+     */
+    public static ComplexVector multiply(Complex num, ComplexVector vector) {
         return new ComplexVector(
                 Complex.multiply(num, vector.getCoordinates()[0]),
                 Complex.multiply(num, vector.getCoordinates()[1]),

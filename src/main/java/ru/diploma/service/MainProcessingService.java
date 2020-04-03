@@ -2,21 +2,25 @@ package ru.diploma.service;
 
 import org.springframework.stereotype.Component;
 import ru.diploma.config.ApplicationConfig;
+import ru.diploma.config.SysLinEqConfig;
 import ru.diploma.data.CellVectors;
+import ru.diploma.data.SystemOfLinearEquations;
 import ru.diploma.error.DataReadException;
 import ru.diploma.util.IOUtil;
 
 import java.io.IOException;
 
 @Component
-public class ProcessingService {
+public class MainProcessingService {
 
     private DataGenService dataGenService;
     private ApplicationConfig config;
+    private SysLinEqConfig eqConfig;
 
-    public ProcessingService(DataGenService dataGenService, ApplicationConfig config) {
+    public MainProcessingService(DataGenService dataGenService, ApplicationConfig config, SysLinEqConfig eqConfig) {
         this.dataGenService = dataGenService;
         this.config = config;
+        this.eqConfig = eqConfig;
     }
 
     public void runProcessing() {
@@ -36,7 +40,7 @@ public class ProcessingService {
                 IOUtil.printFigureArea(cellArea);
             }
 
-
+            SystemOfLinearEquations system = new SystemOfLinearEquations(cells, cellVectors, collocationPoint, eqConfig);
         } catch (DataReadException | IOException e) {
             e.printStackTrace();
         }

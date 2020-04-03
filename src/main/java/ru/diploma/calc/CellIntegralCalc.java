@@ -76,7 +76,7 @@ public class CellIntegralCalc {
 
                 s_sum += s;
                 sub_cell_count++;
-                printToFile(rc);
+//                printToFile(rc);
 
                 res.add(ComplexVector.multiply(s, func.funcDefOnCell(x, eps, k, rc)));
             }
