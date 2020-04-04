@@ -1,6 +1,7 @@
 package ru.diploma.util;
 
 import ru.diploma.data.CellVectors;
+import ru.diploma.data.complex.Complex;
 
 import java.io.*;
 
@@ -8,6 +9,7 @@ public class IOUtil {
 
     /**
      * Вычисление площади фигуры по площади ячеек и вывод ркзультата в консоль
+     *
      * @param cellArea
      */
     public static void printFigureArea(float[] cellArea) {
@@ -22,6 +24,7 @@ public class IOUtil {
 
     /**
      * Вывод результата формирования даныых для расчета в файйл
+     *
      * @param cellArea
      * @param collocationPoints
      * @param cells
@@ -69,6 +72,72 @@ public class IOUtil {
                         }
                         stringBuilder.append("\n");
                 }
+            }
+            out.append(stringBuilder.toString());
+            out.flush();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void writeComplexMatrixToFile(Complex[][] data) {
+        float[][] real_part = new float[data.length][data[0].length];
+        float[][] imag_part = new float[data.length][data[0].length];
+
+        for (int i = 0; i < data.length; i++) {
+            for (int j = 0; j < data[i].length; j++) {
+                real_part[i][j] = data[i][j].getRe();
+                imag_part[i][j] = data[i][j].getIm();
+            }
+        }
+
+        writeMatrixToFile("real_part_matrix", real_part);
+        writeMatrixToFile("imag_part_matrix", imag_part);
+    }
+
+    public static void writeConstantTermToFile(Complex[] data) {
+        float[] real_part = new float[data.length];
+        float[] imag_part = new float[data.length];
+
+
+        for (int i = 0; i < data.length; i++) {
+            real_part[i] = data[i].getRe();
+            imag_part[i] = data[i].getIm();
+        }
+
+        writeConstantTermToFile("real_part_constant_term", real_part);
+        writeConstantTermToFile("image_part_constant_term", imag_part);
+    }
+
+    private static void writeConstantTermToFile(String fileName, float[] data) {
+        File fileDir = new File("src/main/resources/data/" + fileName);
+        try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(data.length).append("\n");
+            for (float datum : data) {
+                stringBuilder.append(datum).append(" ");
+                stringBuilder.append("\n");
+            }
+            out.append(stringBuilder.toString());
+            out.flush();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Вывод матрицы в файл
+     */
+    private static void writeMatrixToFile(String fileName, float[][] data) {
+        File fileDir = new File("src/main/resources/data/" + fileName);
+        try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(data.length).append(" ").append(data[0].length).append("\n");
+            for (float[] datum : data) {
+                for (float v : datum) {
+                    stringBuilder.append(v).append(" ");
+                }
+                stringBuilder.append("\n");
             }
             out.append(stringBuilder.toString());
             out.flush();

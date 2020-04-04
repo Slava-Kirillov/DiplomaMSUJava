@@ -32,18 +32,18 @@ public class Complex
     /**
      * The real, Re(z), part of the <code>ComplexNumber</code>.
      */
-    private double real;
+    private float real;
     /**
      * The imaginary, Im(z), part of the <code>ComplexNumber</code>.
      */
-    private double imaginary;
+    private float imaginary;
     /**
      * Constructs a new <code>ComplexNumber</code> object with both real and imaginary parts 0 (z = 0 + 0i).
      */
     public Complex()
     {
-        real = 0.0;
-        imaginary = 0.0;
+        real = 0.0f;
+        imaginary = 0.0f;
     }
 
     /**
@@ -52,7 +52,7 @@ public class Complex
      * @param imaginary the imaginary part, Im(z), of the complex number
      */
 
-    public Complex(double real, double imaginary)
+    public Complex(float real, float imaginary)
     {
         this.real = real;
         this.imaginary = imaginary;
@@ -133,14 +133,14 @@ public class Complex
      */
     public static Complex multiply(Complex z1, Complex z2)
     {
-        double _real = z1.real*z2.real - z1.imaginary*z2.imaginary;
-        double _imaginary = z1.real*z2.imaginary + z1.imaginary*z2.real;
+        float _real = z1.real*z2.real - z1.imaginary*z2.imaginary;
+        float _imaginary = z1.real*z2.imaginary + z1.imaginary*z2.real;
         return new Complex(_real,_imaginary);
     }
 
     public static Complex multiply(float num, Complex z){
-        double _real = z.real*num;
-        double _imaginary = z.imaginary*num;
+        float _real = z.real*num;
+        float _imaginary = z.imaginary*num;
         return new Complex(_real, _imaginary);
     }
     /**
@@ -152,7 +152,7 @@ public class Complex
     public static Complex divide(Complex z1, Complex z2)
     {
         Complex output = multiply(z1,z2.conjugate());
-        double div = Math.pow(z2.mod(),2);
+        float div = (float) Math.pow(z2.mod(),2);
         return new Complex(output.real/div,output.imaginary/div);
     }
 
@@ -171,9 +171,9 @@ public class Complex
      * @return the magnitude or modulus of current complex number
      */
 
-    public double mod()
+    public float mod()
     {
-        return Math.sqrt(Math.pow(this.real,2) + Math.pow(this.imaginary,2));
+        return (float) Math.sqrt(Math.pow(this.real,2) + Math.pow(this.imaginary,2));
     }
 
     /**
@@ -183,8 +183,8 @@ public class Complex
 
     public Complex square()
     {
-        double _real = this.real*this.real - this.imaginary*this.imaginary;
-        double _imaginary = 2*this.real*this.imaginary;
+        float _real = this.real*this.real - this.imaginary*this.imaginary;
+        float _imaginary = 2*this.real*this.imaginary;
         return new Complex(_real,_imaginary);
     }
     /**
@@ -209,11 +209,11 @@ public class Complex
      */
     public static Complex exp(Complex z)
     {
-        double a = z.real;
-        double b = z.imaginary;
-        double r = Math.exp(a);
-        a = r*Math.cos(b);
-        b = r*Math.sin(b);
+        float a = z.real;
+        float b = z.imaginary;
+        float r = (float) Math.exp(a);
+        a = (float) (r*Math.cos(b));
+        b = (float) (r*Math.sin(b));
         return new Complex(a,b);
     }
     /**
@@ -227,8 +227,8 @@ public class Complex
         Complex output = new Complex(z.getRe(),z.getIm());
         for(int i = 1; i < power; i++)
         {
-            double _real = output.real*z.real - output.imaginary*z.imaginary;
-            double _imaginary = output.real*z.imaginary + output.imaginary*z.real;
+            float _real = output.real*z.real - output.imaginary*z.imaginary;
+            float _imaginary = output.real*z.imaginary + output.imaginary*z.real;
             output = new Complex(_real,_imaginary);
         }
         return output;
@@ -240,10 +240,10 @@ public class Complex
      */
     public static Complex sin(Complex z)
     {
-        double x = Math.exp(z.imaginary);
-        double x_inv = 1/x;
-        double r = Math.sin(z.real) * (x + x_inv)/2;
-        double i = Math.cos(z.real) * (x - x_inv)/2;
+        float x = (float) Math.exp(z.imaginary);
+        float x_inv = 1/x;
+        float r = (float) (Math.sin(z.real) * (x + x_inv)/2);
+        float i = (float) (Math.cos(z.real) * (x - x_inv)/2);
         return new Complex(r,i);
     }
     /**
@@ -253,10 +253,10 @@ public class Complex
      */
     public static Complex cos(Complex z)
     {
-        double x = Math.exp(z.imaginary);
-        double x_inv = 1/x;
-        double r = Math.cos(z.real) * (x + x_inv)/2;
-        double i = -Math.sin(z.real) * (x - x_inv)/2;
+        float x = (float) Math.exp(z.imaginary);
+        float x_inv = 1/x;
+        float r = (float) (Math.cos(z.real) * (x + x_inv)/2);
+        float i = (float) (-Math.sin(z.real) * (x - x_inv)/2);
         return new Complex(r,i);
     }
     /**
@@ -299,7 +299,7 @@ public class Complex
      * The real part of <code>ComplexNumber</code>
      * @return the real part of the complex number
      */
-    public double getRe()
+    public float getRe()
     {
         return this.real;
     }
@@ -307,7 +307,7 @@ public class Complex
      * The imaginary part of <code>ComplexNumber</code>
      * @return the imaginary part of the complex number
      */
-    public double getIm()
+    public float getIm()
     {
         return this.imaginary;
     }
@@ -315,9 +315,9 @@ public class Complex
      * The argument/phase of the current complex number.
      * @return arg(z) - the argument of current complex number
      */
-    public double getArg()
+    public float getArg()
     {
-        return Math.atan2(imaginary,real);
+        return (float) Math.atan2(imaginary,real);
     }
     /**
      * Parses the <code>String</code> as a <code>ComplexNumber</code> of type x+yi.
@@ -338,13 +338,13 @@ public class Complex
             {
                 re = s.substring(0,s.indexOf('+'));
                 im = s.substring(s.indexOf('+')+1,s.length());
-                parsed = new Complex(Double.parseDouble(re),Double.parseDouble(im));
+                parsed = new Complex(Float.parseFloat(re),Float.parseFloat(im));
             }
             else if(s.lastIndexOf('-') > 0)
             {
                 re = s.substring(0,s.lastIndexOf('-'));
                 im = s.substring(s.lastIndexOf('-')+1,s.length());
-                parsed = new Complex(Double.parseDouble(re),-Double.parseDouble(im));
+                parsed = new Complex(Float.parseFloat(re),-Float.parseFloat(im));
             }
         }
         else
@@ -354,12 +354,12 @@ public class Complex
             {
                 s = s.replaceAll("i","");
                 s = s.replaceAll("I","");
-                parsed = new Complex(0, Double.parseDouble(s));
+                parsed = new Complex(0, Float.parseFloat(s));
             }
             // Pure real number
             else
             {
-                parsed = new Complex(Double.parseDouble(s),0);
+                parsed = new Complex(Float.parseFloat(s),0);
             }
         }
         return parsed;

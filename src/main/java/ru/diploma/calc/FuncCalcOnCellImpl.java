@@ -46,7 +46,7 @@ public class FuncCalcOnCellImpl {
         Complex a1 = new Complex(-k.getIm() * r, k.getRe() * r);
         Complex a2 = Complex.exp(a1);
         Complex a3 = new Complex(-1, 0);
-        Complex a4 = new Complex(4 * Math.PI * Math.pow(r, 3), 0);
+        Complex a4 = new Complex((float) (4 * Math.PI * Math.pow(r, 3)), 0);
 
         Complex interRes = Complex.divide(Complex.multiply(a2, Complex.add(a1, a3)), a4);
 

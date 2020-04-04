@@ -41,6 +41,9 @@ public class MainProcessingService {
             }
 
             SystemOfLinearEquations system = new SystemOfLinearEquations(cells, cellVectors, collocationPoint, eqConfig);
+
+            IOUtil.writeComplexMatrixToFile(system.getMatrix_of_coefficient());
+            IOUtil.writeConstantTermToFile(system.getConstant_term());
         } catch (DataReadException | IOException e) {
             e.printStackTrace();
         }

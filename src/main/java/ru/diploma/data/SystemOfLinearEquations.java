@@ -118,7 +118,7 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
      *
      * @param cellVectors       - Вектора для ячеук
      * @param collocationPoints - Точки коллокации для яцеек
-     * @param waveVector  - Волновое число для внешнего электромагнитного поля
+     * @param waveVector        - Волновое число для внешнего электромагнитного поля
      * @param complexAmplitude  - Комплексная амплитуда внешнего эелектормагнитного поля
      * @return
      */
@@ -169,6 +169,7 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
 
     /**
      * Получить радиус вектор точки коллокации в виде вектора с комплексными координатами
+     *
      * @param collocPoint - координаты точки коллокации
      * @return
      */
