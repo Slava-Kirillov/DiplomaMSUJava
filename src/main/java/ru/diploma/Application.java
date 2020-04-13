@@ -16,7 +16,9 @@ public class Application {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        mainProcessingService.runProcessing();
+//        mainProcessingService.runProcessing();
+
+        mainProcessingService.resultProcessing();
 
         stopWatch.stop();
         System.out.println(

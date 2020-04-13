@@ -1,11 +1,9 @@
 package ru.diploma.service;
 
+import ru.diploma.data.complex.Complex;
 import ru.diploma.error.DataReadException;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class IOService {
 
@@ -64,5 +62,56 @@ public class IOService {
             }
             throw new DataReadException("Wrong data. Number of cells:" + numberOfCells);
         }
+    }
+
+    public static Complex[] getResutlFromFile() throws IOException {
+        File fileReal = new File("src/main/resources/data/real_result");
+        File fileImag = new File("src/main/resources/data/imag_result");
+
+        float[] arrayReal = null;
+        float[] arrayImage = null;
+
+        int numberOfRows;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileReal))) {
+            String line;
+
+            line = reader.readLine();
+            numberOfRows = Integer.parseInt(line);
+
+            if (numberOfRows != 0) {
+                arrayReal = new float[numberOfRows];
+                for (int i = 0; i < numberOfRows; i++) {
+                    line = reader.readLine();
+                    arrayReal[i] = Float.parseFloat(line);
+                }
+            }
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileImag))) {
+            String line;
+
+            line = reader.readLine();
+            numberOfRows = Integer.parseInt(line);
+
+            if (numberOfRows != 0) {
+                arrayImage = new float[numberOfRows];
+                for (int i = 0; i < numberOfRows; i++) {
+                    line = reader.readLine();
+                    arrayImage[i] = Float.parseFloat(line);
+                }
+            }
+        }
+
+        if (arrayReal != null && arrayImage != null) {
+            Complex[] arrayComplex = new Complex[numberOfRows];
+
+            for (int i = 0; i < numberOfRows; i++) {
+                Complex complex = new Complex(arrayReal[i], arrayImage[i]);
+                arrayComplex[i] = complex;
+            }
+            return arrayComplex;
+        }
+        return null;
     }
 }

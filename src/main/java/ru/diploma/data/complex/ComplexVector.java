@@ -27,6 +27,12 @@ public class ComplexVector {
         this.coordinates = new Complex[]{x1, x2, x3};
     }
 
+    /**
+     * Векторное умножение в унитарном пространстве
+     * @param vec1
+     * @param vec2
+     * @return
+     */
     public static ComplexVector vecMultiply(ComplexVector vec1, ComplexVector vec2) {
         Complex[] a = vec1.getCoordinates();
         Complex[] b = vec2.getCoordinates();

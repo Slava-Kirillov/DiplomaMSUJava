@@ -6,5 +6,5 @@ import ru.diploma.error.DataValidationException;
 
 @FunctionalInterface
 public interface FuncCalcOnCell {
-    ComplexVector funcDefOnCell(float[] x, float eps, Complex k, float[] y) throws DataValidationException;
+    ComplexVector funcDefOnCell(float[] x, float eps, Complex k, float[] y);
 }

@@ -80,7 +80,7 @@ public class IOUtil {
         }
     }
 
-    public static void writeComplexMatrixToFile(Complex[][] data) {
+    public static void writeComplexMatrixToFile(Complex[][] data, String fileNameReal, String fileNameImag) {
         float[][] real_part = new float[data.length][data[0].length];
         float[][] imag_part = new float[data.length][data[0].length];
 
@@ -91,11 +91,11 @@ public class IOUtil {
             }
         }
 
-        writeMatrixToFile("real_part_matrix", real_part);
-        writeMatrixToFile("imag_part_matrix", imag_part);
+        writeMatrixToFile(fileNameReal, real_part);
+        writeMatrixToFile(fileNameImag, imag_part);
     }
 
-    public static void writeConstantTermToFile(Complex[] data) {
+    public static void writeConstantTermToFile(Complex[] data, String fileNameReal, String fileNameImag) {
         float[] real_part = new float[data.length];
         float[] imag_part = new float[data.length];
 

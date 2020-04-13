@@ -31,13 +31,7 @@ public class CellIntegralCalc {
      * @return
      * @throws DataValidationException
      */
-    public static ComplexVector cellIntegralCalculation(float[] x,
-                                                        float[][] cell,
-                                                        float eps,
-                                                        Complex k,
-                                                        int m,
-                                                        FuncCalcOnCell func,
-                                                        int vecDim) throws DataValidationException {
+    public static ComplexVector cellIntegralCalculation(float[] x, float[][] cell, float eps, Complex k, int m, FuncCalcOnCell func, int vecDim) {
         ComplexVector res = new ComplexVector();
         float p, q, p1, q1, a, b, s, a1, a2, a3, a4;
 
@@ -78,7 +72,13 @@ public class CellIntegralCalc {
                 sub_cell_count++;
 //                printToFile(rc);
 
-                res.add(ComplexVector.multiply(s, func.funcDefOnCell(x, eps, k, rc)));
+                ComplexVector funcDefOnCell = func.funcDefOnCell(x, eps, k, rc);
+
+//                if (Float.isNaN(funcDefOnCell.getCoordinates()[0].getRe())) {
+//                    System.out.println("test");
+//                }
+
+                res.add(ComplexVector.multiply(s, funcDefOnCell));
             }
         }
 

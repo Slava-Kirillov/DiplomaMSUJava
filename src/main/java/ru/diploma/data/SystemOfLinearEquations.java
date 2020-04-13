@@ -18,17 +18,14 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
     private Complex[][] matrix_of_coefficient;
     private Complex[] constant_term;
 
-    public SystemOfLinearEquations(float[][][] cells, CellVectors cellVectors, float[][] collocationPoints,
-                                   SysLinEqConfig config) {
+    public SystemOfLinearEquations(float[][][] cells, CellVectors cellVectors, float[][] collocationPoints, SysLinEqConfig config) {
         this.matrix_of_coefficient = new Complex[cells.length * 2][cells.length * 2];
         this.constant_term = new Complex[cells.length * 2];
 
         Complex wave_num_complex = new Complex(config.getWave_number(), 0.0f);
 
-        this.calcMatrixOfCoefficient(cells, cellVectors, collocationPoints,
-                wave_num_complex);
-        this.calcConstantTerm(cellVectors, collocationPoints, this.getWaveVector(wave_num_complex, config.getAnglePhi()),
-                this.getComplexAmplitude(config));
+        this.calcMatrixOfCoefficient(cells, cellVectors, collocationPoints, wave_num_complex);
+        this.calcConstantTerm(cellVectors, collocationPoints, this.getWaveVector(wave_num_complex, config.getAnglePhi()), this.getComplexAmplitude(config));
         this.executor.shutdown();
     }
 
@@ -55,6 +52,8 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
 
         this.executor = Executors.newFixedThreadPool(cores);
 
+//        cores = 1;
+
         List<Callable<Boolean>> tasks = new ArrayList<>();
         for (int i = 0; i < cores; i++) {
             int start = numIterForTask * i;
@@ -65,8 +64,7 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
                 end = numIterForTask * (i + 1);
             }
 
-            Callable<Boolean> task =
-                    () -> parallelTask(start, end, cells, tau_vectors, eps, collocationPoints, wave_num_complex);
+            Callable<Boolean> task = () -> parallelTask(start, end, cells, tau_vectors, eps, collocationPoints, wave_num_complex);
             tasks.add(task);
         }
 
@@ -91,24 +89,20 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
     private Boolean parallelTask(int start, int end, float[][][] cells, float[][][] tau_vectors, float eps,
                                  float[][] collocationPoints, Complex wave_num_complex) {
         System.out.println("Task started. Thread: " + Thread.currentThread().getId());
-        try {
-            for (int i = start; i < end; i++) {
-                for (int k = 0; k < cells.length; k++) {
-                    for (int m = 0; m < 2; m++) {
-                        for (int l = 0; l < 2; l++) {
-                            Complex matrixElement_kk_ii = getCoefficient(i, k, m, l, cells[i], tau_vectors[l][k],
-                                    tau_vectors[m][i], collocationPoints[i], eps, wave_num_complex);
-                            int kk = 2 * k + l; // номер столбца для вставки в matrix
-                            int ii = 2 * i + m; // номер строки для вставки в matrix
-                            this.matrix_of_coefficient[ii][kk] = matrixElement_kk_ii;
-                        }
+
+        for (int i = start; i < end; i++) {
+            for (int k = 0; k < cells.length; k++) {
+                for (int m = 0; m < 2; m++) {
+                    for (int l = 0; l < 2; l++) {
+                        Complex matrixElement_kk_ii = getCoefficient(i, k, m, l, cells[i], tau_vectors[l][k], tau_vectors[m][i], collocationPoints[i], eps, wave_num_complex);
+                        int kk = 2 * k + l; // номер столбца для вставки в matrix
+                        int ii = 2 * i + m; // номер строки для вставки в matrix
+                        this.matrix_of_coefficient[ii][kk] = matrixElement_kk_ii;
                     }
                 }
             }
-        } catch (DataValidationException e) {
-            System.out.println("Task error. " + e.getMessage());
-            return false;
         }
+
         System.out.println("Task ended. Thread: " + Thread.currentThread().getId());
         return true;
     }
@@ -142,6 +136,9 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
 
                 int ii = 2 * i + m;
                 constant_term[ii] = ComplexVector.scalarMultiply(tau, vecMult);
+//                if (constant_term[ii].getRe() == 0.0) {
+//                    System.out.println("test");
+//                }
             }
         }
 
@@ -193,9 +190,7 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
      * @return
      * @throws DataValidationException
      */
-    private Complex getCoefficient(int i, int k, int m, int l, float[][] cell_i, float[] tau_k_l,
-                                   float[] tau_i_m, float[] x_i, float eps, Complex wave_vec)
-            throws DataValidationException {
+    private Complex getCoefficient(int i, int k, int m, int l, float[][] cell_i, float[] tau_k_l, float[] tau_i_m, float[] x_i, float eps, Complex wave_vec) {
         int g = 5;// разбиение стороны ячейки
 
         float additional_coef = 0.0f;

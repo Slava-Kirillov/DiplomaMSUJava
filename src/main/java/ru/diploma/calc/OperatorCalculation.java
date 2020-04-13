@@ -15,8 +15,7 @@ public class OperatorCalculation {
                                              Complex k,
                                              int m,
                                              ComplexVector vector,
-                                             int vecDim)
-            throws DataValidationException {
+                                             int vecDim) {
         ComplexVector integral = CellIntegralCalc.cellIntegralCalculation(x,
                 cell,
                 eps,

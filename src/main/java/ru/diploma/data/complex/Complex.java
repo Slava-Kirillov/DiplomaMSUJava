@@ -152,8 +152,18 @@ public class Complex
     public static Complex divide(Complex z1, Complex z2)
     {
         Complex output = multiply(z1,z2.conjugate());
-        float div = (float) Math.pow(z2.mod(),2);
-        return new Complex(output.real/div,output.imaginary/div);
+        double div =  Math.pow(z2.mod(),2);
+
+        double real = output.real/div;
+        double image = output.imaginary/div;
+
+        Complex result = new Complex((float) real, (float) image);
+
+//        if (Float.isNaN(result.getRe()) || Float.isNaN(result.getIm())){
+//            System.out.println("Test");
+//        }
+
+        return result;
     }
 
     /**
