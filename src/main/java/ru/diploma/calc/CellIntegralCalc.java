@@ -74,10 +74,6 @@ public class CellIntegralCalc {
 
                 ComplexVector funcDefOnCell = func.funcDefOnCell(x, eps, k, rc);
 
-//                if (Float.isNaN(funcDefOnCell.getCoordinates()[0].getRe())) {
-//                    System.out.println("test");
-//                }
-
                 res.add(ComplexVector.multiply(s, funcDefOnCell));
             }
         }
@@ -86,7 +82,7 @@ public class CellIntegralCalc {
     }
 
     private static void printToFile(float[] rc) {
-        String filePath = "src/main/resources/data/rc_all.dat";
+        String filePath = "src/main/resources/data/results/rc_all.dat";
         File file = new File(filePath);
 
         if (file.exists() && sub_cell_count == 1) {

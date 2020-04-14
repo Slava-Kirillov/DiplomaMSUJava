@@ -16,12 +16,9 @@ public class Application {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-//        mainProcessingService.runProcessing();
-
-        mainProcessingService.resultProcessing();
+        mainProcessingService.runProcessing();
 
         stopWatch.stop();
-        System.out.println(
-                String.format("Общее время вычислений: %s ms", stopWatch.getLastTaskTimeMillis()));
+        System.out.println(String.format("Общее время вычислений: %s ms", stopWatch.getLastTaskTimeMillis()));
     }
 }

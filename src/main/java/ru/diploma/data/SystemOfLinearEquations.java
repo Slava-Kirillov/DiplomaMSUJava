@@ -1,7 +1,7 @@
 package ru.diploma.data;
 
 import ru.diploma.calc.OperatorCalculation;
-import ru.diploma.config.SysLinEqConfig;
+import ru.diploma.config.EqConfig;
 import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
 import ru.diploma.error.DataValidationException;
@@ -18,7 +18,7 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
     private Complex[][] matrix_of_coefficient;
     private Complex[] constant_term;
 
-    public SystemOfLinearEquations(float[][][] cells, CellVectors cellVectors, float[][] collocationPoints, SysLinEqConfig config) {
+    public SystemOfLinearEquations(float[][][] cells, CellVectors cellVectors, float[][] collocationPoints, EqConfig config) {
         this.matrix_of_coefficient = new Complex[cells.length * 2][cells.length * 2];
         this.constant_term = new Complex[cells.length * 2];
 
@@ -136,9 +136,6 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
 
                 int ii = 2 * i + m;
                 constant_term[ii] = ComplexVector.scalarMultiply(tau, vecMult);
-//                if (constant_term[ii].getRe() == 0.0) {
-//                    System.out.println("test");
-//                }
             }
         }
 
@@ -241,7 +238,7 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
      *
      * @return
      */
-    private ComplexVector getComplexAmplitude(SysLinEqConfig config) {
+    private ComplexVector getComplexAmplitude(EqConfig config) {
         return new ComplexVector(config.getEx(), config.getEy(), config.getEz());
     }
 
@@ -249,8 +246,8 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
         double sinPhi = Math.sin(anglePhi);
         double cosPhi = Math.cos(anglePhi);
         return new ComplexVector(
-                Complex.multiply((float) sinPhi, wave_number),
                 Complex.multiply((float) cosPhi, wave_number),
+                Complex.multiply((float) sinPhi, wave_number),
                 new Complex()
         );
     }

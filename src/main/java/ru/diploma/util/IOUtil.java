@@ -47,7 +47,7 @@ public class IOUtil {
      * Вывод массива в файл
      */
     public static <T> void writeResultToFile(String fileName, T data, int dimensional, int numberOfLine) {
-        File fileDir = new File("src/main/resources/data/" + fileName);
+        File fileDir = new File("src/main/resources/data/results/" + fileName);
         try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < numberOfLine; ++i) {
@@ -110,7 +110,7 @@ public class IOUtil {
     }
 
     private static void writeConstantTermToFile(String fileName, float[] data) {
-        File fileDir = new File("src/main/resources/data/" + fileName);
+        File fileDir = new File("src/main/resources/data/results/" + fileName);
         try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(data.length).append("\n");
@@ -129,7 +129,7 @@ public class IOUtil {
      * Вывод матрицы в файл
      */
     private static void writeMatrixToFile(String fileName, float[][] data) {
-        File fileDir = new File("src/main/resources/data/" + fileName);
+        File fileDir = new File("src/main/resources/data/results/" + fileName);
         try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(data.length).append(" ").append(data[0].length).append("\n");

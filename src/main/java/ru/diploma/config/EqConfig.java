@@ -8,7 +8,7 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @PropertySource("classpath:equation.properties")
 @Getter
-public class SysLinEqConfig {
+public class EqConfig {
     @Value("${wave.number}")
     private float wave_number;
     @Value("${angle.phi}")

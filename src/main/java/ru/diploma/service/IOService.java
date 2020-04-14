@@ -65,8 +65,8 @@ public class IOService {
     }
 
     public static Complex[] getResutlFromFile() throws IOException {
-        File fileReal = new File("src/main/resources/data/real_result");
-        File fileImag = new File("src/main/resources/data/imag_result");
+        File fileReal = new File("src/main/resources/data/results/real_result");
+        File fileImag = new File("src/main/resources/data/results/imag_result");
 
         float[] arrayReal = null;
         float[] arrayImage = null;
