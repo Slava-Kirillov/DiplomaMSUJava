@@ -2,7 +2,7 @@ package ru.diploma.calc;
 
 import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
-import ru.diploma.error.DataValidationException;
+import ru.diploma.util.DataUtils;
 
 public class FuncCalcOnCellImpl {
 
@@ -12,34 +12,23 @@ public class FuncCalcOnCellImpl {
      * @return
      */
     public static ComplexVector funcDefOnCell(float[] x, float eps, Complex k, float[] y) {
-        float r = getLengthRadiusVec(x, y);
+        float[] coord_r = {x[0] - y[0], x[1] - y[1], x[2] - y[2]};
+        float r = DataUtils.getVectorNorma(coord_r);
 
-        if (r > Math.pow(10, -10)) {
-            ComplexVector funcV = funcV(x, k, y);
+        if (r < Math.pow(10, -10)) {
+            return new ComplexVector();
+        } else {
+            ComplexVector funcV = funcV(x, k, y, r);
+            float tetaEps = (float) (3 * Math.pow(r / eps, 2) - 2 * Math.pow(r / eps, 3));
             if (r < eps) {
-                float tetaEps = funcTetaEps(x, y, eps);
                 return ComplexVector.multiply(tetaEps, funcV);
+            } else {
+                return funcV;
             }
-            return funcV;
         }
-        return new ComplexVector();
     }
 
-    /**
-     * Вычисляет функцию tetaEps
-     *
-     * @param x
-     * @param y
-     * @param eps
-     * @return
-     */
-    private static float funcTetaEps(float[] x, float[] y, float eps) {
-        float r = getLengthRadiusVec(x, y);
-        return (float) (3 * Math.pow(r / eps, 2) - 2 * Math.pow(r / eps, 3));
-    }
-
-    public static ComplexVector funcV(float[] x, Complex k, float[] y) {
-        float r = getLengthRadiusVec(x, y);
+    public static ComplexVector funcV(float[] x, Complex k, float[] y, float r) {
 
         Complex r_complex = new Complex(r, 0.0F);
         Complex unit_imag = new Complex(0.0f, 1.0f);
@@ -85,8 +74,9 @@ public class FuncCalcOnCellImpl {
      * @param y
      * @return
      */
-    private static float getLengthRadiusVec(float[] x, float[] y) {
-        return (float) Math.sqrt(Math.pow(y[0] - x[0], 2) + Math.pow(y[1] - x[1], 2) + Math.pow(y[2] - x[2], 2));
+    public static float getLengthRadiusVec(float[] x, float[] y) {
+        float[] r = {x[0] - y[0], x[1] - y[1], x[2] - y[2]};
+        return DataUtils.getVectorNorma(r);
     }
 
     private static float[] subtractVectors(float[] x, float[] y) {

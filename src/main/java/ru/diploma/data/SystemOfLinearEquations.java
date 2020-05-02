@@ -1,12 +1,13 @@
 package ru.diploma.data;
 
+import ru.diploma.calc.CellIntegralCalc;
+import ru.diploma.calc.FuncCalcOnCellImpl;
 import ru.diploma.calc.OperatorCalculation;
 import ru.diploma.config.EqConfig;
 import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
-import ru.diploma.error.DataValidationException;
 import ru.diploma.service.AbstractExecutorService;
-import ru.diploma.service.DataGenService;
+import ru.diploma.util.DataUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +25,10 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
 
         Complex wave_num_complex = new Complex(config.getWave_number(), 0.0f);
 
-        this.calcMatrixOfCoefficient(cells, cellVectors, collocationPoints, wave_num_complex);
-        this.calcConstantTerm(cellVectors, collocationPoints, this.getWaveVector(wave_num_complex, config.getAnglePhi()), this.getComplexAmplitude(config));
+        float angleRadian = (float) (config.getAnglePhi()*Math.PI/180);
+
+        this.calcCoefficientOfMatrix(cells, cellVectors, collocationPoints, wave_num_complex,
+                this.getWaveVector(wave_num_complex, angleRadian), this.getComplexAmplitude(config));
         this.executor.shutdown();
     }
 
@@ -37,10 +40,11 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
      * @param collocationPoints - Точки коллокации для ячеек
      * @return
      */
-    private void calcMatrixOfCoefficient(float[][][] cells, CellVectors cellVectors, float[][] collocationPoints,
-                                         Complex wave_num_complex) {
+    private void calcCoefficientOfMatrix(float[][][] cells, CellVectors cellVectors, float[][] collocationPoints,
+                                         Complex wave_num_complex, ComplexVector waveVector, ComplexVector complexAmplitude) {
         float eps = getEps(cells);
 
+        float[][] normals = cellVectors.getNormal();
         float[][][] tau_vectors = new float[2][cells.length][3];
         tau_vectors[0] = cellVectors.getTau1();
         tau_vectors[1] = cellVectors.getTau2();
@@ -64,7 +68,8 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
                 end = numIterForTask * (i + 1);
             }
 
-            Callable<Boolean> task = () -> parallelTask(start, end, cells, tau_vectors, eps, collocationPoints, wave_num_complex);
+            Callable<Boolean> task = () -> parallelTask(start, end, cells, tau_vectors, eps, collocationPoints,
+                    wave_num_complex, waveVector, complexAmplitude, normals);
             tasks.add(task);
         }
 
@@ -87,59 +92,87 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
      * @return
      */
     private Boolean parallelTask(int start, int end, float[][][] cells, float[][][] tau_vectors, float eps,
-                                 float[][] collocationPoints, Complex wave_num_complex) {
+                                 float[][] collocationPoints, Complex wave_num_complex, ComplexVector waveVector,
+                                 ComplexVector complexAmplitude, float[][] normals) {
         System.out.println("Task started. Thread: " + Thread.currentThread().getId());
 
+        int g = 5;
+        int vecDim = 3;
+
         for (int i = start; i < end; i++) {
+            ComplexVector collocPointVector = getVectorOfCollocPoint(collocationPoints[i]);
+            ComplexVector externalField = getExternalField(complexAmplitude, waveVector, collocPointVector);
+            ComplexVector normal = new ComplexVector(normals[i][0], normals[i][1], normals[i][2]);
+            ComplexVector normalInverse = new ComplexVector(-normals[i][0], -normals[i][1], -normals[i][2]);
+
+
+            ComplexVector vecMult = ComplexVector.vecMultiply(normalInverse, externalField);
+
             for (int k = 0; k < cells.length; k++) {
+                float[][] cell = cells[k];
+                float[] x = collocationPoints[i];
+                ComplexVector integral = CellIntegralCalc.cellIntegralCalculation(x, cell, eps, wave_num_complex, g, vecDim);
+
                 for (int m = 0; m < 2; m++) {
+                    int ii = 2 * i + m; // номер строки для вставки в matrix
                     for (int l = 0; l < 2; l++) {
-                        Complex matrixElement_kk_ii = getCoefficient(i, k, m, l, cells[i], tau_vectors[l][k], tau_vectors[m][i], collocationPoints[i], eps, wave_num_complex);
+
+                        ComplexVector tau_l_k = new ComplexVector(tau_vectors[l][k][0], tau_vectors[l][k][1], tau_vectors[l][k][2]);
+                        ComplexVector tau_m_i = new ComplexVector(tau_vectors[m][i][0], tau_vectors[m][i][1], tau_vectors[m][i][2]);
+
+                        ComplexVector a = ComplexVector.vecMultiply(tau_l_k, integral);
+                        Complex R = ComplexVector.scalarMultiply(ComplexVector.vecMultiply(normal, a), tau_m_i);
+
+                        if (i == k && m == l) {
+                            R.add(new Complex(0.5f, 0.0f));
+                        }
                         int kk = 2 * k + l; // номер столбца для вставки в matrix
-                        int ii = 2 * i + m; // номер строки для вставки в matrix
-                        this.matrix_of_coefficient[ii][kk] = matrixElement_kk_ii;
+                        this.matrix_of_coefficient[ii][kk] = R;
                     }
+                    ComplexVector tau = new ComplexVector(tau_vectors[m][i][0], tau_vectors[m][i][1], tau_vectors[m][i][2]);
+                    constant_term[ii] = ComplexVector.scalarMultiply(vecMult, tau);
                 }
             }
+
         }
 
         System.out.println("Task ended. Thread: " + Thread.currentThread().getId());
         return true;
     }
 
-    /**
-     * Расчет свободных коэффициентов СЛАУ
-     *
-     * @param cellVectors       - Вектора для ячеук
-     * @param collocationPoints - Точки коллокации для яцеек
-     * @param waveVector        - Волновое число для внешнего электромагнитного поля
-     * @param complexAmplitude  - Комплексная амплитуда внешнего эелектормагнитного поля
-     * @return
-     */
-    private void calcConstantTerm(CellVectors cellVectors,
-                                  float[][] collocationPoints,
-                                  ComplexVector waveVector,
-                                  ComplexVector complexAmplitude) {
-        float[][] normals = cellVectors.getNormal();
-        float[][][] tau_vectors = new float[2][normals.length][3];
-        tau_vectors[0] = cellVectors.getTau1();
-        tau_vectors[1] = cellVectors.getTau2();
-
-        for (int i = 0; i < normals.length; i++) {
-            ComplexVector collocPointVector = getVectorOfCollocPoint(collocationPoints[i]);
-            ComplexVector externalField = getExternalField(complexAmplitude, waveVector, collocPointVector);
-            ComplexVector normal = new ComplexVector(-normals[i][0], -normals[i][1], -normals[i][2]);
-
-            ComplexVector vecMult = ComplexVector.vecMultiply(normal, externalField);
-            for (int m = 0; m < 2; m++) {
-                ComplexVector tau = new ComplexVector(tau_vectors[m][i][0], tau_vectors[m][i][1], tau_vectors[m][i][2]);
-
-                int ii = 2 * i + m;
-                constant_term[ii] = ComplexVector.scalarMultiply(tau, vecMult);
-            }
-        }
-
-    }
+//    /**
+//     * Расчет свободных коэффициентов СЛАУ
+//     *
+//     * @param cellVectors       - Вектора для ячеук
+//     * @param collocationPoints - Точки коллокации для яцеек
+//     * @param waveVector        - Волновое число для внешнего электромагнитного поля
+//     * @param complexAmplitude  - Комплексная амплитуда внешнего эелектормагнитного поля
+//     * @return
+//     */
+//    private void calcConstantTerm(CellVectors cellVectors,
+//                                  float[][] collocationPoints,
+//                                  ComplexVector waveVector,
+//                                  ComplexVector complexAmplitude) {
+//        float[][] normals = cellVectors.getNormal();
+//        float[][][] tau_vectors = new float[2][normals.length][3];
+//        tau_vectors[0] = cellVectors.getTau1();
+//        tau_vectors[1] = cellVectors.getTau2();
+//
+//        for (int i = 0; i < normals.length; i++) {
+//            ComplexVector collocPointVector = getVectorOfCollocPoint(collocationPoints[i]);
+//            ComplexVector externalField = getExternalField(complexAmplitude, waveVector, collocPointVector);
+//            ComplexVector normal = new ComplexVector(-normals[i][0], -normals[i][1], -normals[i][2]);
+//
+//            ComplexVector vecMult = ComplexVector.vecMultiply(normal, externalField);
+//            for (int m = 0; m < 2; m++) {
+//                ComplexVector tau = new ComplexVector(tau_vectors[m][i][0], tau_vectors[m][i][1], tau_vectors[m][i][2]);
+//
+//                int ii = 2 * i + m;
+//                constant_term[ii] = ComplexVector.scalarMultiply(tau, vecMult);
+//            }
+//        }
+//
+//    }
 
     /**
      * Вычисление внешнего электромагнитного поля в точке коллокации Eext = E0 * exp(i*k*r)
@@ -153,10 +186,15 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
      * @param collocPointVector - r
      * @return
      */
-    private ComplexVector getExternalField(ComplexVector complexAmplitude, ComplexVector waveVector,
+    private ComplexVector getExternalField(ComplexVector complexAmplitude,
+                                           ComplexVector waveVector,
                                            ComplexVector collocPointVector) {
         Complex imagUnit = new Complex(0.0f, 1.0f);
-        Complex exp = Complex.exp(Complex.multiply(imagUnit, ComplexVector.scalarMultiply(waveVector, collocPointVector)));
+
+        Complex a1 = ComplexVector.scalarMultiply(waveVector, collocPointVector);
+        Complex a2 = Complex.multiply(imagUnit, a1);
+
+        Complex exp = Complex.exp(a2);
         return ComplexVector.multiply(exp, complexAmplitude);
 
     }
@@ -178,32 +216,31 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
      * @param k
      * @param m
      * @param l
-     * @param cell_i
+     * @param cell_k
      * @param tau_k_l
      * @param tau_i_m
      * @param x_i
      * @param eps
-     * @param wave_vec
+     * @param wave_num
      * @return
-     * @throws DataValidationException
      */
-    private Complex getCoefficient(int i, int k, int m, int l, float[][] cell_i, float[] tau_k_l, float[] tau_i_m, float[] x_i, float eps, Complex wave_vec) {
-        int g = 5;// разбиение стороны ячейки
-
-        float additional_coef = 0.0f;
-        if (i == k && m == l) {
-            additional_coef = 0.5f;
-        }
-
-        Complex additional_coef_complex = new Complex(additional_coef, 0.0f);
-
-        ComplexVector tau_i_m_complex = new ComplexVector(tau_i_m[0], tau_i_m[1], tau_i_m[2]);
-        ComplexVector tau_k_l_complex = new ComplexVector(tau_k_l[0], tau_k_l[1], tau_k_l[2]);
-
-        ComplexVector operator_R = OperatorCalculation.operatorCalc(x_i, cell_i, eps, wave_vec, g, tau_k_l_complex, 3);
-
-        return Complex.add(additional_coef_complex, ComplexVector.scalarMultiply(tau_i_m_complex, operator_R));
-    }
+//    private Complex getCoefficient(int i, int k, int m, int l, float[][] cell_k, float[] tau_k_l, float[] tau_i_m, ComplexVector normal, float[] x_i, float eps, Complex wave_num) {
+//        int g = 5;// разбиение стороны ячейки
+//
+//        float additional_coef = 0.0f;
+//        if (i == k && m == l) {
+//            additional_coef = 0.5f;
+//        }
+//
+//        Complex additional_coef_complex = new Complex(additional_coef, 0.0f);
+//
+//        ComplexVector tau_i_m_complex = new ComplexVector(tau_i_m[0], tau_i_m[1], tau_i_m[2]);
+//        ComplexVector tau_k_l_complex = new ComplexVector(tau_k_l[0], tau_k_l[1], tau_k_l[2]);
+//
+//        ComplexVector operator_R = OperatorCalculation.operatorCalc(x_i, cell_k, eps, wave_num, g, tau_k_l_complex, 3);
+//
+//        return Complex.add(additional_coef_complex, ComplexVector.scalarMultiply(ComplexVector.vecMultiply(normal, operator_R), tau_i_m_complex));
+//    }
 
     /**
      * Расчет параметра эпсилон, для сглаживания особенности в ядре интегрального оператора
@@ -216,9 +253,9 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
         float h = -1;
 
         for (float[][] cell : cells) {
-            CellDiagonals diags = DataGenService.getDiagOfCell(cell, numCoordinates);
-            float diag1 = DataGenService.getVectorNorma(diags.getDiag1());
-            float diag2 = DataGenService.getVectorNorma(diags.getDiag2());
+            CellDiagonals diags = DataUtils.getDiagOfCell(cell, numCoordinates);
+            float diag1 = DataUtils.getVectorNorma(diags.getDiag1());
+            float diag2 = DataUtils.getVectorNorma(diags.getDiag2());
 
             if (h == -1) {
                 h = diag1;
@@ -246,8 +283,8 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
         double sinPhi = Math.sin(anglePhi);
         double cosPhi = Math.cos(anglePhi);
         return new ComplexVector(
-                Complex.multiply((float) cosPhi, wave_number),
-                Complex.multiply((float) sinPhi, wave_number),
+                Complex.multiply((float) -cosPhi, wave_number),
+                Complex.multiply((float) -sinPhi, wave_number),
                 new Complex()
         );
     }

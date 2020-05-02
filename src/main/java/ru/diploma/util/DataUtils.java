@@ -1,18 +1,12 @@
-package ru.diploma.service;
+package ru.diploma.util;
 
-import org.springframework.stereotype.Component;
-import ru.diploma.config.ApplicationConfig;
+import org.apache.commons.math3.util.Precision;
 import ru.diploma.data.CellDiagonals;
 import ru.diploma.data.CellVectors;
 
-@Component
-public class DataGenService {
+import java.math.RoundingMode;
 
-    private ApplicationConfig config;
-
-    public DataGenService(ApplicationConfig applicationConfig) {
-        this.config = applicationConfig;
-    }
+public class DataUtils {
 
     /**
      * Получить точки коллокации
@@ -43,9 +37,7 @@ public class DataGenService {
      * @param cells
      * @return
      */
-    public CellVectors getCellVectors(float[][][] cells) {
-        int numCoordinatesPoint = config.getNumCoordinatePoint();
-
+    public static CellVectors getCellVectors(float[][][] cells, int numCoordinatesPoint) {
         float[][] normal = new float[cells.length][numCoordinatesPoint];
         float[][] tau1 = new float[cells.length][numCoordinatesPoint];
         float[][] tau2 = new float[cells.length][numCoordinatesPoint];
@@ -53,7 +45,7 @@ public class DataGenService {
         CellVectors cellVectors = new CellVectors(normal, tau1, tau2);
 
         for (int i = 0; i < cells.length; ++i) {
-            CellDiagonals diagonals = getDiagOfCell(cells[i], config.getNumCoordinatePoint());
+            CellDiagonals diagonals = getDiagOfCell(cells[i], numCoordinatesPoint);
 
             float[] vecMultip = getVecMultip(diagonals.getDiag1(), diagonals.getDiag2(), numCoordinatesPoint);
             float vecMultipNorma = getVectorNorma(vecMultip);
@@ -92,7 +84,7 @@ public class DataGenService {
      * @param cells
      * @return
      */
-    public static float[] getCellArea(float[][][] cells, int numCoordPoints) {
+    public static float[] getCellsArea(float[][][] cells, int numCoordPoints) {
         float[] arrayOfCellArea = new float[cells.length];
 
         for (int i = 0; i < cells.length; ++i) {
@@ -101,17 +93,21 @@ public class DataGenService {
         return arrayOfCellArea;
     }
 
-    private static float getCellArea(float[][] cell, int numCoordPoints) {
+    public static float getCellArea(float[][] cell, int numCoordPoints) {
         CellDiagonals diagonals = getDiagOfCell(cell, numCoordPoints);
         float[] diag1 = diagonals.getDiag1();
         float[] diag2 = diagonals.getDiag2();
 
-        float diag1Length = (float) Math.sqrt(diag1[0] * diag1[0] + diag1[1] * diag1[1] + diag1[2] * diag1[2]);
-        float diag2Length = (float) Math.sqrt(diag2[0] * diag2[0] + diag2[1] * diag2[1] + diag2[2] * diag2[2]);
-        float scalarMultDiag1Diag2 = diag1[0] * diag2[0] + diag1[1] * diag2[1] + diag1[2] * diag2[2];
+        float diag1Length = getVectorNorma(diag1);
+        float diag2Length = getVectorNorma(diag2);
+        float scalarMultDiag1Diag2 = getScalarMultip(diag1, diag2);
         return (float) (diag1Length *
                 diag2Length *
                 Math.sqrt(1 - Math.pow((scalarMultDiag1Diag2 / (diag1Length * diag2Length)), 2)) / 2);
+    }
+
+    public static float getScalarMultip(float[] vec1, float[] vec2) {
+        return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2];
     }
 
     public static CellDiagonals getDiagOfCell(float[][] cell, int numCoordPoints) {

@@ -13,7 +13,7 @@ public class IOUtil {
      * @param cellArea
      */
     public static void printFigureArea(float[] cellArea) {
-        double area = 0;
+        float area = 0;
         for (float v : cellArea) {
             area += v;
         }
@@ -33,21 +33,22 @@ public class IOUtil {
     public static void writeAllResultToFiles(float[] cellArea,
                                              float[][] collocationPoints,
                                              float[][][] cells,
-                                             CellVectors cellVectors) {
+                                             CellVectors cellVectors,
+                                             String pathToResults) {
         int numberOfLine = cellArea.length;
-        writeResultToFile("collocation_points.dat", collocationPoints, 2, numberOfLine);
-        writeResultToFile("sphere.dat", cells, 3, numberOfLine);
-        writeResultToFile("cell_area.dat", cellArea, 1, numberOfLine);
-        writeResultToFile("normal_vectors.dat", cellVectors.getNormal(), 2, numberOfLine);
-        writeResultToFile("tau1_vectors.dat", cellVectors.getTau1(), 2, numberOfLine);
-        writeResultToFile("tau2_vectors.dat", cellVectors.getTau2(), 2, numberOfLine);
+        writeResultToFile("collocation_points.dat", collocationPoints, 2, numberOfLine, pathToResults);
+        writeResultToFile("sphere.dat", cells, 3, numberOfLine, pathToResults);
+        writeResultToFile("cell_area.dat", cellArea, 1, numberOfLine, pathToResults);
+        writeResultToFile("normal_vectors.dat", cellVectors.getNormal(), 2, numberOfLine, pathToResults);
+        writeResultToFile("tau1_vectors.dat", cellVectors.getTau1(), 2, numberOfLine, pathToResults);
+        writeResultToFile("tau2_vectors.dat", cellVectors.getTau2(), 2, numberOfLine, pathToResults);
     }
 
     /**
      * Вывод массива в файл
      */
-    public static <T> void writeResultToFile(String fileName, T data, int dimensional, int numberOfLine) {
-        File fileDir = new File("src/main/resources/data/results/" + fileName);
+    public static <T> void writeResultToFile(String fileName, T data, int dimensional, int numberOfLine, String pathToResults) {
+        File fileDir = new File(pathToResults + fileName);
         try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < numberOfLine; ++i) {
@@ -80,7 +81,7 @@ public class IOUtil {
         }
     }
 
-    public static void writeComplexMatrixToFile(Complex[][] data, String fileNameReal, String fileNameImag) {
+    public static void writeComplexMatrixToFile(Complex[][] data, String fileNameReal, String fileNameImag, String pathToResults) {
         float[][] real_part = new float[data.length][data[0].length];
         float[][] imag_part = new float[data.length][data[0].length];
 
@@ -91,11 +92,11 @@ public class IOUtil {
             }
         }
 
-        writeMatrixToFile(fileNameReal, real_part);
-        writeMatrixToFile(fileNameImag, imag_part);
+        writeMatrixToFile(fileNameReal, real_part, pathToResults);
+        writeMatrixToFile(fileNameImag, imag_part, pathToResults);
     }
 
-    public static void writeConstantTermToFile(Complex[] data, String fileNameReal, String fileNameImag) {
+    public static void writeConstantTermToFile(Complex[] data, String fileNameReal, String fileNameImag, String pathToResults) {
         float[] real_part = new float[data.length];
         float[] imag_part = new float[data.length];
 
@@ -105,12 +106,12 @@ public class IOUtil {
             imag_part[i] = data[i].getIm();
         }
 
-        writeConstantTermToFile("real_part_constant_term", real_part);
-        writeConstantTermToFile("image_part_constant_term", imag_part);
+        writeConstantTermToFile(fileNameReal, real_part, pathToResults);
+        writeConstantTermToFile(fileNameImag, imag_part, pathToResults);
     }
 
-    private static void writeConstantTermToFile(String fileName, float[] data) {
-        File fileDir = new File("src/main/resources/data/results/" + fileName);
+    private static void writeConstantTermToFile(String fileName, float[] data, String pathToResults) {
+        File fileDir = new File(pathToResults + fileName);
         try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(data.length).append("\n");
@@ -128,8 +129,8 @@ public class IOUtil {
     /**
      * Вывод матрицы в файл
      */
-    private static void writeMatrixToFile(String fileName, float[][] data) {
-        File fileDir = new File("src/main/resources/data/results/" + fileName);
+    private static void writeMatrixToFile(String fileName, float[][] data, String pathToResults) {
+        File fileDir = new File(pathToResults + fileName);
         try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(data.length).append(" ").append(data[0].length).append("\n");

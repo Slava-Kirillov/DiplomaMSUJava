@@ -5,7 +5,7 @@ import ru.diploma.data.CellDiagonals;
 import ru.diploma.data.complex.Complex;
 import ru.diploma.error.DataReadException;
 import ru.diploma.error.DataValidationException;
-import ru.diploma.service.DataGenService;
+import ru.diploma.util.DataUtils;
 import ru.diploma.service.IOService;
 
 import java.io.IOException;
@@ -22,13 +22,13 @@ public class CellIntgralCalcTest {
         float h = -1;
 
         float[][][] cells = IOService.getArrayOfCellsFromFile(dataFile, numPoints, numCoordinates);
-        float[][] coll_points = DataGenService.getCollocationPoints(cells, numPoints, numCoordinates);
-        float[] cells_area = DataGenService.getCellArea(cells, numCoordinates);
+        float[][] coll_points = DataUtils.getCollocationPoints(cells, numPoints, numCoordinates);
+        float[] cells_area = DataUtils.getCellsArea(cells, numCoordinates);
 
         for (float[][] cell : cells) {
-            CellDiagonals diags = DataGenService.getDiagOfCell(cell, numCoordinates);
-            float diag1 = DataGenService.getVectorNorma(diags.getDiag1());
-            float diag2 = DataGenService.getVectorNorma(diags.getDiag2());
+            CellDiagonals diags = DataUtils.getDiagOfCell(cell, numCoordinates);
+            float diag1 = DataUtils.getVectorNorma(diags.getDiag1());
+            float diag2 = DataUtils.getVectorNorma(diags.getDiag2());
 
             if (h == -1) {
                 h = diag1;
@@ -50,7 +50,6 @@ public class CellIntgralCalcTest {
                         eps,
                         new Complex(),
                         m,
-                        FuncCalcOnCellImpl::funcDefOnCell,
                         numCoordinates);
         }
     }

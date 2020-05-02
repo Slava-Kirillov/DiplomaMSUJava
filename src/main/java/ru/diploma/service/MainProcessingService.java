@@ -1,5 +1,6 @@
 package ru.diploma.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.diploma.config.ApplicationConfig;
 import ru.diploma.config.EqConfig;
@@ -8,25 +9,27 @@ import ru.diploma.data.SystemOfLinearEquations;
 import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
 import ru.diploma.error.DataReadException;
+import ru.diploma.util.DataUtils;
 import ru.diploma.util.IOUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.util.Objects;
 
 @Component
 public class MainProcessingService {
 
-    private DataGenService dataGenService;
+    @Value("${only.write.geometry}")
+    private boolean onlyWriteGeometry;
+
     private ApplicationConfig config;
     private EqConfig eqConfig;
     private EffectiveScatteringAreaService effectiveScatteringAreaService;
 
-    public MainProcessingService(DataGenService dataGenService,
-                                 ApplicationConfig config,
+    public MainProcessingService(ApplicationConfig config,
                                  EqConfig eqConfig,
                                  EffectiveScatteringAreaService effectiveScatteringAreaService) {
-        this.dataGenService = dataGenService;
         this.config = config;
         this.eqConfig = eqConfig;
         this.effectiveScatteringAreaService = effectiveScatteringAreaService;
@@ -35,47 +38,55 @@ public class MainProcessingService {
     public void runProcessing() {
         try {
             String projectDirectoryPath = FileSystems.getDefault().getPath("").toAbsolutePath().toString();
+            String pathToResults = "/src/main/resources/data/results/";
+            File directory = new File(projectDirectoryPath + pathToResults);
+            for (File file: Objects.requireNonNull(directory.listFiles())) {
+                file.delete();
+            }
+
             //ячейки
             float[][][] cells = IOService.getArrayOfCellsFromFile(config.getDataFile(), config.getNumPoints(), config.getNumCoordinatePoint());
             //точки коллокации
-            float[][] collocationPoint = DataGenService.getCollocationPoints(cells, config.getNumPoints(), config.getNumCoordinatePoint());
+            float[][] collocationPoint = DataUtils.getCollocationPoints(cells, config.getNumPoints(), config.getNumCoordinatePoint());
             //площади ячеек
-            float[] cellArea = DataGenService.getCellArea(cells, config.getNumCoordinatePoint());
+            float[] cellArea = DataUtils.getCellsArea(cells, config.getNumCoordinatePoint());
 
             //базис на ячейках
-            CellVectors cellVectors = dataGenService.getCellVectors(cells);
+            CellVectors cellVectors = DataUtils.getCellVectors(cells, config.getNumCoordinatePoint());
 
             if (config.isWriteResults()) {
-                IOUtil.writeAllResultToFiles(cellArea, collocationPoint, cells, cellVectors);
+                IOUtil.writeAllResultToFiles(cellArea, collocationPoint, cells, cellVectors, projectDirectoryPath + pathToResults);
                 IOUtil.printFigureArea(cellArea);
             }
 
-            SystemOfLinearEquations system = new SystemOfLinearEquations(cells, cellVectors, collocationPoint, eqConfig);
+            if (!onlyWriteGeometry) {
+                SystemOfLinearEquations system = new SystemOfLinearEquations(cells, cellVectors, collocationPoint, eqConfig);
 
-            String realMatrixFile = "real_part_matrix";
-            String imagMatrixFile = "imag_part_matrix";
+                String realMatrixFile = "real_part_matrix";
+                String imagMatrixFile = "imag_part_matrix";
 
-            String realConstantTerm = "real_part_constant_term";
-            String imagConstantTerm = "image_part_constant_term";
+                String realConstantTerm = "real_part_constant_term";
+                String imagConstantTerm = "image_part_constant_term";
 
-            IOUtil.writeComplexMatrixToFile(system.getMatrix_of_coefficient(), realMatrixFile, imagMatrixFile);
-            IOUtil.writeConstantTermToFile(system.getConstant_term(), realConstantTerm, imagConstantTerm);
+                IOUtil.writeComplexMatrixToFile(system.getMatrix_of_coefficient(), realMatrixFile, imagMatrixFile, projectDirectoryPath + pathToResults);
+                IOUtil.writeConstantTermToFile(system.getConstant_term(), realConstantTerm, imagConstantTerm, projectDirectoryPath + pathToResults);
 
-            String command = projectDirectoryPath + "/lib/diploma_lapack_calc";
-
-            Runtime run = Runtime.getRuntime();
-            Process proc = run.exec(command);
-            Thread.sleep(5000L);
-            while (proc.isAlive()) {
+                String command = projectDirectoryPath + "/lib/diploma_lapack_calc";
+//
+                Runtime run = Runtime.getRuntime();
+                Process proc = run.exec(command);
+//                Thread.sleep(5000L);
+                while (proc.isAlive()) {
+                }
+//
+                Complex[] currents = resultProcessing(collocationPoint, cellArea, cellVectors, cells.length, projectDirectoryPath + pathToResults);
             }
-
-            resultProcessing(collocationPoint, cellArea, cellVectors, cells.length);
-        } catch (DataReadException | IOException | InterruptedException e) {
+        } catch (DataReadException | IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void resultProcessing(float[][] collocationPoint, float[] cellArea, CellVectors cellVectors, int cellsNumber) {
+    public Complex[] resultProcessing(float[][] collocationPoint, float[] cellArea, CellVectors cellVectors, int cellsNumber, String pathToResults) {
         try {
             Complex[] arrayComplex = IOService.getResutlFromFile();
 
@@ -99,12 +110,14 @@ public class MainProcessingService {
                 }
 
                 if (currents.length > 0) {
-                    effectiveScatteringAreaService.effectiveScatteringAreaBuild(currents, collocationPoint, cellArea);
+                    effectiveScatteringAreaService.effectiveScatteringAreaBuild(currents, collocationPoint, cellArea, pathToResults);
                 }
             }
 
+            return arrayComplex;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 }
