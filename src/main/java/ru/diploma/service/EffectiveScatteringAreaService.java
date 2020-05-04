@@ -17,12 +17,17 @@ public class EffectiveScatteringAreaService {
 
     public void effectiveScatteringAreaBuild(ComplexVector[] currents, float[][] collocationPoint, float[] cellArea, String pathToResults) {
 
-        float[] ESA = new float[181];
+        float[] ESA = new float[1801];
 
         for (int i = 0; i < 181; i++) {
-            float angleRadian = (float) (i*Math.PI/180);
-            float[] tau = {(float) Math.cos(angleRadian), (float) Math.sin(angleRadian), 0.0f};
-            ESA[i] = (float) (calcESA(currents, collocationPoint, cellArea, tau)/Math.PI);
+            for (int j = 0; j < 10; j++) {
+                float angleRadian = (float) (((float) i + j / 10.0f) * Math.PI / 180.0f);
+                float[] tau = {(float) Math.cos(angleRadian), (float) Math.sin(angleRadian), 0.0f};
+                ESA[i*10 + j] = (float) (calcESA(currents, collocationPoint, cellArea, tau) / Math.PI);
+                if (i == 180) {
+                    break;
+                }
+            }
         }
         IOUtil.writeResultToFile("ESA.dat", ESA, 1, ESA.length, pathToResults);
     }
@@ -34,8 +39,7 @@ public class EffectiveScatteringAreaService {
             sumVec.add(calcAreaForVec(tau, collocationPoint[j], currents[j], cellArea[j]));
         }
 
-        return (float) (4 * Math.PI * ComplexVector.scalarMultiply(sumVec, sumVec).getRe());
-//        return (float) (4 * Math.PI * Math.pow(ComplexVector.norm(sumVec), 2));
+        return (float) (4.0f * Math.PI * ComplexVector.scalarMultiply(sumVec, sumVec).getRe());
     }
 
     private ComplexVector calcAreaForVec(float[] directionVec, float[] collocPointVec, ComplexVector current, float area) {
@@ -50,7 +54,7 @@ public class EffectiveScatteringAreaService {
 
         Complex a1 = ComplexVector.scalarMultiply(directionVec_complex, collocPointVec_complex);
         Complex a2 = Complex.multiply(Complex.multiply(imag_unit.conjugate(), k_complex), a1);
-        Complex a3 = Complex.divide(Complex.exp(a2), new Complex((float) (4*Math.PI), 0.0f));
+        Complex a3 = Complex.divide(Complex.exp(a2), new Complex((float) (4.0f * Math.PI), 0.0f));
         ComplexVector a4 = ComplexVector.vecMultiply(directionVec_complex, current);
         ComplexVector a5 = ComplexVector.multiply(Complex.multiply(imag_unit, k_complex), a4);
         ComplexVector a6 = ComplexVector.multiply(area_complex, a5);

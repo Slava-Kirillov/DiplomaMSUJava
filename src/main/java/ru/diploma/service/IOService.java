@@ -21,7 +21,7 @@ public class IOService {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
-            String line = null;
+            String line;
             String[] numbers = null;
             int lineCount = 0;
             int numberOfCells = 0;

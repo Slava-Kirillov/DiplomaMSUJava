@@ -115,12 +115,17 @@ public class IOUtil {
         try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(data.length).append("\n");
-            for (float datum : data) {
-                stringBuilder.append(datum).append(" ");
-                stringBuilder.append("\n");
-            }
             out.append(stringBuilder.toString());
             out.flush();
+
+            for (float datum : data) {
+                stringBuilder = new StringBuilder();
+                stringBuilder.append(datum).append(" ");
+                stringBuilder.append("\n");
+
+                out.append(stringBuilder.toString());
+                out.flush();
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -134,14 +139,19 @@ public class IOUtil {
         try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileDir), "UTF8"))) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(data.length).append(" ").append(data[0].length).append("\n");
+            out.append(stringBuilder.toString());
+            out.flush();
+
             for (float[] datum : data) {
+                stringBuilder = new StringBuilder();
                 for (float v : datum) {
                     stringBuilder.append(v).append(" ");
                 }
                 stringBuilder.append("\n");
+
+                out.append(stringBuilder.toString());
+                out.flush();
             }
-            out.append(stringBuilder.toString());
-            out.flush();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

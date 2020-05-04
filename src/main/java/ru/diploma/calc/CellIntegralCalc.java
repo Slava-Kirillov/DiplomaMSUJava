@@ -3,23 +3,12 @@ package ru.diploma.calc;
 import org.apache.commons.math3.util.Precision;
 import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
-import ru.diploma.error.DataValidationException;
 import ru.diploma.util.DataUtils;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.math.RoundingMode;
 
 public class CellIntegralCalc {
 
-    private static float s_sum = 0;
-    private static int sub_cell_count = 0;
-
-    public static float getS_sum() {
-        return s_sum;
-    }
 
     /**
      * Вычисление интеграла по одной ячейке, с разбиением ячейки на m*m частей
@@ -29,9 +18,7 @@ public class CellIntegralCalc {
      * @param eps- эпсилол, малый параметр, выбирается как eps = 2*h, где h - максимальный из диаметров всех ячеек
      * @param k    - комплексная величина, волновое число
      * @param g    - параметр, указывает число разбиений по стороне ячейки
-     * @param func - функция, которая вычисляется на ячейке
      * @return
-     * @throws DataValidationException
      */
     public static ComplexVector cellIntegralCalculation(float[] x, float[][] cell, float eps, Complex k, int g, int vecDim) {
         ComplexVector res = new ComplexVector();
@@ -43,27 +30,27 @@ public class CellIntegralCalc {
 
         for (int i = 0; i < g; i++) {
             for (int j = 0; j < g; j++) {
-                p = (float) i / (float) g;
-                p1 = (float) (i + 1) / (float) g;
-                q = (float) j / (float) g;
-                q1 = (float) (j + 1) / (float) g;
+                p = ((float) i) / ((float) g);
+                p1 = ((float) (i + 1)) / ((float) g);
+                q = ((float) j) / ((float) g);
+                q1 = ((float) (j + 1)) / ((float) g);
 
                 for (int ii = 0; ii < vecDim; ii++) {
-                    a = q * cell[1][ii] + (1 - q) * cell[0][ii];
-                    b = q * cell[2][ii] + (1 - q) * cell[3][ii];
+                    a = q * cell[1][ii] + (1.0f - q) * cell[0][ii];
+                    b = q * cell[2][ii] + (1.0f - q) * cell[3][ii];
 
-                    a1 = p * b + (1 - p) * a;
-                    a4 = p1 * b + (1 - p1) * a;
+                    a1 = p * b + (1.0f - p) * a;
+                    a4 = p1 * b + (1.0f - p1) * a;
 
-                    a = q1 * cell[1][ii] + (1 - q1) * cell[0][ii];
-                    b = q1 * cell[2][ii] + (1 - q1) * cell[3][ii];
+                    a = q1 * cell[1][ii] + (1.0f - q1) * cell[0][ii];
+                    b = q1 * cell[2][ii] + (1.0f - q1) * cell[3][ii];
 
-                    a2 = p * b + (1 - p) * a;
-                    a3 = p1 * b + (1 - p1) * a;
+                    a2 = p * b + (1.0f - p) * a;
+                    a3 = p1 * b + (1.0f - p1) * a;
 
-                    rc[ii] = (a1 + a2 + a3 + a4) / 4;
-                    m1[ii] = ((a2 + a3) - (a1 + a4)) / 2;
-                    m2[ii] = ((a3 + a4) - (a1 + a2)) / 2;
+                    rc[ii] = (a1 + a2 + a3 + a4) / 4.0f;
+                    m1[ii] = ((a2 + a3) - (a1 + a4)) / 2.0f;
+                    m2[ii] = ((a3 + a4) - (a1 + a2)) / 2.0f;
                 }
 
                 float[] rn = DataUtils.getVecMultip(m1, m2, vecDim);
@@ -77,8 +64,8 @@ public class CellIntegralCalc {
                 if (r < Math.pow(10, -10)) {
                     funcDefOnCell = new ComplexVector();
                 } else {
-                    ComplexVector funcv = FuncCalcOnCellImpl.funcV(x, k, rc, r);
-                    float tetaEps = (float) (3 * Math.pow(r / eps, 2) - 2 * Math.pow(r / eps, 3));
+                    ComplexVector funcv = FuncCalcOnCell.funcV(x, k, rc, r);
+                    float tetaEps = (float) (3.0f * Math.pow(r / eps, 2) - 2.0f * Math.pow(r / eps, 3));
                     if (r < eps) {
                         funcDefOnCell = ComplexVector.multiply(tetaEps, funcv);
                     } else {
@@ -90,24 +77,5 @@ public class CellIntegralCalc {
             }
         }
         return res;
-    }
-
-    private static void printToFile(float[] rc) {
-        String filePath = "src/main/resources/data/results/rc_all.dat";
-        File file = new File(filePath);
-
-        if (file.exists() && sub_cell_count == 1) {
-            file.delete();
-        }
-
-        try {
-            String text = rc[0] + " " + rc[1] + " " + rc[2] + "\n";
-            FileWriter writer = new FileWriter(filePath, true);
-            BufferedWriter bufferWriter = new BufferedWriter(writer);
-            bufferWriter.write(text);
-            bufferWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

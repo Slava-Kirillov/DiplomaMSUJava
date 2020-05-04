@@ -2,6 +2,7 @@ package ru.diploma.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 import ru.diploma.config.ApplicationConfig;
 import ru.diploma.config.EqConfig;
 import ru.diploma.data.CellVectors;
@@ -23,9 +24,9 @@ public class MainProcessingService {
     @Value("${only.write.geometry}")
     private boolean onlyWriteGeometry;
 
-    private ApplicationConfig config;
-    private EqConfig eqConfig;
-    private EffectiveScatteringAreaService effectiveScatteringAreaService;
+    private final ApplicationConfig config;
+    private final EqConfig eqConfig;
+    private final EffectiveScatteringAreaService effectiveScatteringAreaService;
 
     public MainProcessingService(ApplicationConfig config,
                                  EqConfig eqConfig,
@@ -60,7 +61,11 @@ public class MainProcessingService {
             }
 
             if (!onlyWriteGeometry) {
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
                 SystemOfLinearEquations system = new SystemOfLinearEquations(cells, cellVectors, collocationPoint, eqConfig);
+                stopWatch.stop();
+                System.out.println("Filling matrix " + stopWatch.getLastTaskTimeMillis() + " ms");
 
                 String realMatrixFile = "real_part_matrix";
                 String imagMatrixFile = "imag_part_matrix";
@@ -72,13 +77,20 @@ public class MainProcessingService {
                 IOUtil.writeConstantTermToFile(system.getConstant_term(), realConstantTerm, imagConstantTerm, projectDirectoryPath + pathToResults);
 
                 String command = projectDirectoryPath + "/lib/diploma_lapack_calc";
-//
+
+                system = null;
+
+                System.out.println("LAPACK calc run ---------");
+                stopWatch.start();
                 Runtime run = Runtime.getRuntime();
                 Process proc = run.exec(command);
 //                Thread.sleep(5000L);
                 while (proc.isAlive()) {
                 }
-//
+
+                stopWatch.stop();
+                System.out.println("LAPACK calc end " + stopWatch.getLastTaskTimeMillis() + " ms");
+
                 Complex[] currents = resultProcessing(collocationPoint, cellArea, cellVectors, cells.length, projectDirectoryPath + pathToResults);
             }
         } catch (DataReadException | IOException e) {

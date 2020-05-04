@@ -71,14 +71,14 @@ public class ComplexVector {
         );
     }
 
-//    public static Complex scalarMultiply(float[] realVec1, ComplexVector vec2) {
-//        ComplexVector vec1 = new ComplexVector(
-//                new Complex(realVec1[0], 0),
-//                new Complex(realVec1[1], 0),
-//                new Complex(realVec1[2], 0)
-//        );
-//        return scalarMultiply(vec1, vec2);
-//    }
+    public static Complex scalarMultiply(float[] realVec1, ComplexVector vec2) {
+        ComplexVector vec1 = new ComplexVector(
+                new Complex(realVec1[0], 0),
+                new Complex(realVec1[1], 0),
+                new Complex(realVec1[2], 0)
+        );
+        return scalarMultiply(vec1, vec2);
+    }
 
     /**
      * скалярное произведение в унитарном пространстве (линейное пространство над полем комплексных чисел)
@@ -149,10 +149,5 @@ public class ComplexVector {
         sum.add(v3);
 
         return (float) Math.sqrt(sum.getRe());
-
-//        double s = Math.pow(coord[0].getRe(), 2) + Math.pow(coord[0].getIm(), 2) +
-//                Math.pow(coord[1].getRe(), 2) + Math.pow(coord[1].getIm(), 2) +
-//                Math.pow(coord[2].getRe(), 2) + Math.pow(coord[2].getIm(), 2);
-//        return (float) Math.sqrt(s);
     }
 }

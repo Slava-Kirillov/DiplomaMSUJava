@@ -17,15 +17,15 @@ public class DataUtils {
     public static float[][] getCollocationPoints(float[][][] cells, int numPointsCell, int numCoordinatesPoint) {
 
         float[][] arrayOfCollocationPoints = new float[cells.length][numCoordinatesPoint];
-        float coordinate = 0;
-        float initial_coordinate = 0;
+        float coordinate = 0.0f;
+        float initial_coordinate = 0.0f;
 
         for (int i = 0; i < cells.length; ++i) {
             for (int j = 0; j < numCoordinatesPoint; ++j) {
                 for (int k = 0; k < numPointsCell; ++k) {
                     coordinate = coordinate + cells[i][k][j];
                 }
-                arrayOfCollocationPoints[i][j] = coordinate / 4;
+                arrayOfCollocationPoints[i][j] = coordinate / 4.0f;
                 coordinate = initial_coordinate;
             }
         }
@@ -103,7 +103,7 @@ public class DataUtils {
         float scalarMultDiag1Diag2 = getScalarMultip(diag1, diag2);
         return (float) (diag1Length *
                 diag2Length *
-                Math.sqrt(1 - Math.pow((scalarMultDiag1Diag2 / (diag1Length * diag2Length)), 2)) / 2);
+                Math.sqrt(1.0f - Math.pow((scalarMultDiag1Diag2 / (diag1Length * diag2Length)), 2)) / 2.0f);
     }
 
     public static float getScalarMultip(float[] vec1, float[] vec2) {
