@@ -157,13 +157,7 @@ public class Complex
         double real = output.real/div;
         double image = output.imaginary/div;
 
-        Complex result = new Complex((float) real, (float) image);
-
-//        if (Float.isNaN(result.getRe()) || Float.isNaN(result.getIm())){
-//            System.out.println("Test");
-//        }
-
-        return result;
+        return new Complex((float) real, (float) image);
     }
 
     /**
