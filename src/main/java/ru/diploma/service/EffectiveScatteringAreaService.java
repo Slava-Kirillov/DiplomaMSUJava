@@ -1,6 +1,7 @@
 package ru.diploma.service;
 
 import org.springframework.stereotype.Component;
+import ru.diploma.config.ApplicationConfig;
 import ru.diploma.config.EqConfig;
 import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
@@ -10,9 +11,11 @@ import ru.diploma.util.IOUtil;
 public class EffectiveScatteringAreaService {
 
     private final EqConfig eqConfig;
+    private final ApplicationConfig applicationConfig;
 
-    public EffectiveScatteringAreaService(EqConfig eqConfig) {
+    public EffectiveScatteringAreaService(EqConfig eqConfig, ApplicationConfig applicationConfig) {
         this.eqConfig = eqConfig;
+        this.applicationConfig = applicationConfig;
     }
 
     public void effectiveScatteringAreaBuild(ComplexVector[] currents, float[][] collocationPoint, float[] cellArea, String pathToResults) {
@@ -29,7 +32,8 @@ public class EffectiveScatteringAreaService {
                 }
             }
         }
-        IOUtil.writeResultToFile("ESA.dat", ESA, 1, ESA.length, pathToResults);
+        String geodat = applicationConfig.getDataFile().replaceAll("geodat_", "");
+        IOUtil.writeResultToFile(String.format("%d_%s_%s", (int) eqConfig.getWave_number(),"ESA", geodat), ESA, 1, ESA.length, pathToResults);
     }
 
     private float calcESA(ComplexVector[] currents, float[][] collocationPoint, float[] cellArea, float[] tau) {

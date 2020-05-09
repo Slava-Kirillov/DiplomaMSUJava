@@ -1,5 +1,6 @@
 package ru.diploma.service;
 
+import org.apache.commons.lang3.StringUtils;
 import ru.diploma.data.complex.Complex;
 import ru.diploma.error.DataReadException;
 
@@ -49,9 +50,15 @@ public class IOService {
                     }
                     if (numbers.length == numPoints * numCoordPoints) {
                         for (int j = 0; j < numPoints; j++) {
+                            float[] coords = new float[3];
                             for (int k = 0; k < numCoordPoints; k++) {
                                 int index = k + j * numCoordPoints;
-                                arrayOfCell[i][j][k] = Float.parseFloat(numbers[index]);
+                                 coords[k] = Float.parseFloat(numbers[index]);
+                            }
+                            if (StringUtils.compare(dataFile, "geodat_30_50.dat") == 0) {
+                                arrayOfCell[i][j] = rotatePoint(coords);
+                            } else {
+                                arrayOfCell[i][j] = coords;
                             }
                         }
                     } else {
@@ -62,6 +69,15 @@ public class IOService {
             }
             throw new DataReadException("Wrong data. Number of cells:" + numberOfCells);
         }
+    }
+
+    private static float[] rotatePoint(float[] coord) {
+        float[] newCoord = new float[3];
+
+        newCoord[0] = (float) (coord[0] * Math.cos(Math.toRadians(90.0)) + coord[1] * 0 + coord[2] * (-Math.sin(Math.toRadians(90.0))));
+        newCoord[1] = coord[0] * 0 + coord[1] * 1 + coord[2] * 0;
+        newCoord[2] = (float) (coord[0] * Math.sin(Math.toRadians(90.0)) + coord[1] * 0 + coord[2] * (-Math.cos(Math.toRadians(90.0))));
+        return newCoord;
     }
 
     public static Complex[] getResutlFromFile() throws IOException {
