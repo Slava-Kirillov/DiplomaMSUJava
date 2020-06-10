@@ -33,7 +33,7 @@ public abstract class AbstractExecutorService {
         }
 
         long diff = System.currentTimeMillis() - startTs;
-        System.out.println(String.format("Finished [%s] in %d ms", getTasksBatchName(), diff));
+//        System.out.println(String.format("Finished [%s] in %d ms", getTasksBatchName(), diff));
 
         return out;
     }

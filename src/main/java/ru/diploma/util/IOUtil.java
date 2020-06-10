@@ -1,7 +1,7 @@
 package ru.diploma.util;
 
+import org.apache.commons.math3.complex.Complex;
 import ru.diploma.data.CellVectors;
-import ru.diploma.data.complex.Complex;
 
 import java.io.*;
 
@@ -87,8 +87,8 @@ public class IOUtil {
 
         for (int i = 0; i < data.length; i++) {
             for (int j = 0; j < data[i].length; j++) {
-                real_part[i][j] = data[i][j].getRe();
-                imag_part[i][j] = data[i][j].getIm();
+                real_part[i][j] = (float) data[i][j].getReal();
+                imag_part[i][j] = (float) data[i][j].getImaginary();
             }
         }
 
@@ -102,8 +102,8 @@ public class IOUtil {
 
 
         for (int i = 0; i < data.length; i++) {
-            real_part[i] = data[i].getRe();
-            imag_part[i] = data[i].getIm();
+            real_part[i] = (float) data[i].getReal();
+            imag_part[i] = (float) data[i].getImaginary();
         }
 
         writeConstantTermToFile(fileNameReal, real_part, pathToResults);

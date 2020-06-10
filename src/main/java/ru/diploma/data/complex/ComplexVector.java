@@ -1,6 +1,7 @@
 package ru.diploma.data.complex;
 
 import lombok.Getter;
+import org.apache.commons.math3.complex.Complex;
 
 /**
  * Класс для комплексных векторов
@@ -37,9 +38,9 @@ public class ComplexVector {
         Complex[] a = vec1.getCoordinates();
         Complex[] b = vec2.getCoordinates();
         return new ComplexVector(
-                Complex.subtract(Complex.multiply(a[1], b[2]), Complex.multiply(a[2], b[1])),
-                Complex.subtract(Complex.multiply(a[2], b[0]), Complex.multiply(a[0], b[2])),
-                Complex.subtract(Complex.multiply(a[0], b[1]), Complex.multiply(a[1], b[0]))
+                (a[1].multiply(b[2])).subtract((a[2].multiply(b[1]))),
+                (a[2].multiply(b[0])).subtract((a[0].multiply(b[2]))),
+                (a[0].multiply(b[1])).subtract((a[1].multiply(b[0])))
         );
     }
 
@@ -51,9 +52,9 @@ public class ComplexVector {
      */
     public static ComplexVector multiply(float num, ComplexVector vector) {
         return new ComplexVector(
-                Complex.multiply(num, vector.getCoordinates()[0]),
-                Complex.multiply(num, vector.getCoordinates()[1]),
-                Complex.multiply(num, vector.getCoordinates()[2])
+                vector.getCoordinates()[0].multiply(num),
+                vector.getCoordinates()[1].multiply(num),
+                vector.getCoordinates()[2].multiply(num)
         );
     }
 
@@ -65,9 +66,9 @@ public class ComplexVector {
      */
     public static ComplexVector multiply(Complex num, ComplexVector vector) {
         return new ComplexVector(
-                Complex.multiply(num, vector.getCoordinates()[0]),
-                Complex.multiply(num, vector.getCoordinates()[1]),
-                Complex.multiply(num, vector.getCoordinates()[2])
+                vector.getCoordinates()[0].multiply(num),
+                vector.getCoordinates()[1].multiply(num),
+                vector.getCoordinates()[2].multiply(num)
         );
     }
 
@@ -90,10 +91,10 @@ public class ComplexVector {
         Complex[] coordVec1 = vec1.getCoordinates();
         Complex[] coordVec2 = vec2.getCoordinates();
 
-        Complex sum = new Complex();
+        Complex sum = new Complex(0,0);
 
         for (int i = 0; i < coordVec1.length; i++) {
-            sum.add(Complex.multiply(coordVec1[i], coordVec2[i].conjugate()));
+            sum = sum.add(coordVec1[i].multiply(coordVec2[i].conjugate()));
         }
         return sum;
     }
@@ -107,9 +108,9 @@ public class ComplexVector {
      */
     public static ComplexVector sum(ComplexVector vec1, ComplexVector vec2) {
         return new ComplexVector(
-                Complex.add(vec1.getCoordinates()[0], vec2.getCoordinates()[0]),
-                Complex.add(vec1.getCoordinates()[1], vec2.getCoordinates()[1]),
-                Complex.add(vec1.getCoordinates()[2], vec2.getCoordinates()[2])
+                vec1.getCoordinates()[0].add(vec2.getCoordinates()[0]),
+                vec1.getCoordinates()[1].add(vec2.getCoordinates()[1]),
+                vec1.getCoordinates()[2].add(vec2.getCoordinates()[2])
         );
     }
 
@@ -122,32 +123,28 @@ public class ComplexVector {
      */
     public static ComplexVector subtract(ComplexVector vec1, ComplexVector vec2) {
         return new ComplexVector(
-                Complex.subtract(vec1.getCoordinates()[0], vec2.getCoordinates()[0]),
-                Complex.subtract(vec1.getCoordinates()[1], vec2.getCoordinates()[1]),
-                Complex.subtract(vec1.getCoordinates()[2], vec2.getCoordinates()[2])
+                vec1.getCoordinates()[0].subtract(vec2.getCoordinates()[0]),
+                vec1.getCoordinates()[1].subtract(vec2.getCoordinates()[1]),
+                vec1.getCoordinates()[2].subtract(vec2.getCoordinates()[2])
         );
     }
 
     public void add(ComplexVector vec) {
         Complex[] addedVector = vec.getCoordinates();
         for (int i = 0; i < coordinates.length; i++) {
-            coordinates[i].add(addedVector[i]);
+            coordinates[i] = coordinates[i].add(addedVector[i]);
         }
     }
 
     public static float norm(ComplexVector vector) {
         Complex[] coord = vector.getCoordinates();
 
-        Complex sum = new Complex();
+        Complex sum = new Complex(0,0);
 
-        Complex v1 = Complex.multiply(coord[0], coord[0].conjugate());
-        Complex v2 = Complex.multiply(coord[1], coord[1].conjugate());
-        Complex v3 = Complex.multiply(coord[2], coord[2].conjugate());
+        Complex v1 = coord[0].multiply(coord[0].conjugate());
+        Complex v2 = coord[1].multiply(coord[1].conjugate());
+        Complex v3 = coord[2].multiply(coord[2].conjugate());
 
-        sum.add(v1);
-        sum.add(v2);
-        sum.add(v3);
-
-        return (float) Math.sqrt(sum.getRe());
+        return (float) Math.sqrt(sum.add(v1).add(v2).add(v3).getReal());
     }
 }

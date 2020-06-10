@@ -1,8 +1,8 @@
 package ru.diploma.calc;
 
+import org.apache.commons.math3.complex.Complex;
 import org.junit.jupiter.api.Test;
 import ru.diploma.data.CellVectors;
-import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
 import ru.diploma.util.DataUtils;
 
@@ -28,8 +28,8 @@ public class CellIntegralCalcTest {
         ComplexVector.vecMultiply(tau_k_l_complex1, vec);
         ComplexVector.vecMultiply(tau_k_l_complex2, vec);
         Complex[] coord = vec.getCoordinates();
-        System.out.println(coord[0].getRe() + " " + coord[0].getIm());
-        System.out.println(coord[1].getRe() + " " + coord[1].getIm());
-        System.out.println(coord[2].getRe() + " " + coord[2].getIm());
+        System.out.println(coord[0].getReal() + " " + coord[0].getImaginary());
+        System.out.println(coord[1].getReal() + " " + coord[1].getImaginary());
+        System.out.println(coord[2].getReal() + " " + coord[2].getImaginary());
     }
 }

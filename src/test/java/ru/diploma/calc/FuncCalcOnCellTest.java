@@ -1,7 +1,7 @@
 package ru.diploma.calc;
 
+import org.apache.commons.math3.complex.Complex;
 import org.junit.jupiter.api.Test;
-import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
 
 import static ru.diploma.calc.FuncCalcOnCell.getLengthRadiusVec;

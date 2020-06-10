@@ -1,6 +1,6 @@
 package ru.diploma.calc;
 
-import ru.diploma.data.complex.Complex;
+import org.apache.commons.math3.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
 import ru.diploma.util.DataUtils;
 
@@ -12,22 +12,22 @@ public class FuncCalcOnCell {
         Complex unit_real = new Complex(1.0f, 0.0f);
         Complex pi = new Complex((float) (4 * Math.PI), 0.0f);
 
-        Complex a1 = Complex.multiply(unit_imag, k);
-        a1.multiply(r_complex);
+        Complex a1 = unit_imag.multiply(k);
+        a1 = a1.multiply(r_complex);
 
-        Complex a2 = Complex.subtract(a1, unit_real);
-        Complex a3 = Complex.exp(a1);
-        Complex a4 = Complex.multiply(pi, Complex.pow(r_complex, 3));
+        Complex a2 = a1.subtract(unit_real);
+        Complex a3 = a1.exp();
+        Complex a4 = pi.multiply(r_complex.pow(3));
 
-        Complex interRes = Complex.multiply(a3, a2);
-        interRes.divide(a4);
+        Complex interRes = a3.multiply(a2);
+        interRes = interRes.divide(a4);
 
         float[] vec = subtractVectors(y, x);
 
         return new ComplexVector(
-                Complex.multiply(vec[0], interRes),
-                Complex.multiply(vec[1], interRes),
-                Complex.multiply(vec[2], interRes)
+                interRes.multiply(vec[0]),
+                interRes.multiply(vec[1]),
+                interRes.multiply(vec[2])
         );
     }
 

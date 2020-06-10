@@ -1,5 +1,6 @@
 package ru.diploma.service;
 
+import org.apache.commons.math3.complex.Complex;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
@@ -7,7 +8,6 @@ import ru.diploma.config.ApplicationConfig;
 import ru.diploma.config.EqConfig;
 import ru.diploma.data.CellVectors;
 import ru.diploma.data.SystemOfLinearEquations;
-import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
 import ru.diploma.error.DataReadException;
 import ru.diploma.util.DataUtils;
@@ -60,10 +60,23 @@ public class MainProcessingService {
                 IOUtil.printFigureArea(cellArea);
             }
 
+            // Задание сетки углов
+            float phiMin = 0.0f;
+            float phiMax = 360.0f;
+            int N = 361; //число точек на диаграмме
+
+            float step = (phiMax -phiMin)/(N - 1);
+
+            float[] phi = new float[N];
+
+            for (int i = 0; i < N; i++) {
+                phi[i] = (float) Math.toRadians(i * step);
+            }
+
             if (!onlyWriteGeometry) {
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
-                SystemOfLinearEquations system = new SystemOfLinearEquations(cells, cellVectors, collocationPoint, eqConfig);
+                SystemOfLinearEquations system = new SystemOfLinearEquations(cells, cellVectors, collocationPoint, phi, eqConfig);
                 stopWatch.stop();
                 System.out.println("Filling matrix " + stopWatch.getLastTaskTimeMillis() + " ms");
 
@@ -73,12 +86,17 @@ public class MainProcessingService {
                 String realConstantTerm = "real_part_constant_term";
                 String imagConstantTerm = "image_part_constant_term";
 
+                System.gc();
+                System.out.println("Write to files");
                 IOUtil.writeComplexMatrixToFile(system.getMatrix_of_coefficient(), realMatrixFile, imagMatrixFile, projectDirectoryPath + pathToResults);
                 IOUtil.writeConstantTermToFile(system.getConstant_term(), realConstantTerm, imagConstantTerm, projectDirectoryPath + pathToResults);
 
                 String command = projectDirectoryPath + "/lib/diploma_lapack_calc";
 
                 system = null;
+
+                System.gc();
+//                Runtime.getRuntime().gc();
 
                 System.out.println("LAPACK calc run ---------");
                 stopWatch.start();

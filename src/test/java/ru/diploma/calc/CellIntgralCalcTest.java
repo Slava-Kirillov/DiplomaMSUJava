@@ -1,8 +1,8 @@
 package ru.diploma.calc;
 
+import org.apache.commons.math3.complex.Complex;
 import org.junit.jupiter.api.Test;
 import ru.diploma.data.CellDiagonals;
-import ru.diploma.data.complex.Complex;
 import ru.diploma.error.DataReadException;
 import ru.diploma.error.DataValidationException;
 import ru.diploma.util.DataUtils;
@@ -48,7 +48,7 @@ public class CellIntgralCalcTest {
                 CellIntegralCalc.cellIntegralCalculation(coll_points[i],
                         cells[i],
                         eps,
-                        new Complex(),
+                        new Complex(0,0),
                         m,
                         numCoordinates);
         }

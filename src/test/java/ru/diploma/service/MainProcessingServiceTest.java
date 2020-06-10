@@ -1,10 +1,10 @@
 package ru.diploma.service;
 
+import org.apache.commons.math3.complex.Complex;
 import org.junit.jupiter.api.Test;
 import ru.diploma.config.EqConfig;
 import ru.diploma.data.CellVectors;
 import ru.diploma.data.SystemOfLinearEquations;
-import ru.diploma.data.complex.Complex;
 import ru.diploma.error.DataReadException;
 import ru.diploma.util.DataUtils;
 
@@ -26,7 +26,7 @@ public class MainProcessingServiceTest {
 
         EqConfig eqConfig = new EqConfig(4.1f, 0, 0,1,0);
 
-        SystemOfLinearEquations system = new SystemOfLinearEquations(cells, cellVectors, coll_points, eqConfig);
+//        SystemOfLinearEquations system = new SystemOfLinearEquations(cells, cellVectors, coll_points, eqConfig);
 
         Complex[] currents = IOService.getResutlFromFile();
 

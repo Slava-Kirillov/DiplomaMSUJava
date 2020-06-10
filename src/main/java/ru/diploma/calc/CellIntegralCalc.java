@@ -1,11 +1,8 @@
 package ru.diploma.calc;
 
-import org.apache.commons.math3.util.Precision;
-import ru.diploma.data.complex.Complex;
+import org.apache.commons.math3.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
 import ru.diploma.util.DataUtils;
-
-import java.math.RoundingMode;
 
 public class CellIntegralCalc {
 

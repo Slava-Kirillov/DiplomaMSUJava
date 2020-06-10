@@ -1,8 +1,9 @@
 package ru.diploma.data;
 
+import org.apache.commons.math3.complex.Complex;
 import ru.diploma.calc.CellIntegralCalc;
+import ru.diploma.calc.FuncCalcOnCell;
 import ru.diploma.config.EqConfig;
-import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
 import ru.diploma.service.AbstractExecutorService;
 import ru.diploma.util.DataUtils;
@@ -12,12 +13,14 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
+import static ru.diploma.calc.CellIntegralCalc.cellIntegralCalculation;
+
 public class SystemOfLinearEquations extends AbstractExecutorService {
 
     private final Complex[][] matrix_of_coefficient;
     private final Complex[] constant_term;
 
-    public SystemOfLinearEquations(float[][][] cells, CellVectors cellVectors, float[][] collocationPoints, EqConfig config) {
+    public SystemOfLinearEquations(float[][][] cells, CellVectors cellVectors, float[][] collocationPoints, float[] phi, EqConfig config) {
         this.matrix_of_coefficient = new Complex[cells.length * 2][cells.length * 2];
         this.constant_term = new Complex[cells.length * 2];
 
@@ -53,6 +56,8 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
         int numIterForTask = totalNum / cores;
 
         this.executor = Executors.newFixedThreadPool(cores);
+
+//        cores = 1;
 
         List<Callable<Boolean>> tasks = new ArrayList<>();
         for (int i = 0; i < cores; i++) {
@@ -95,38 +100,52 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
         int g = 5;
         int vecDim = 3;
 
+        boolean yes = false;
+        if (start == 0){
+            yes = true;
+            System.out.println("end: " + end);
+        }
+
+        ComplexVector collocPointVector, externalField,normal,normalInverse,vecMult,tau,integral,tau_l_k,tau_m_i,a;
+        Complex R;
+        int ii = 0;
+        int kk = 0;
+
         for (int i = start; i < end; i++) {
-            ComplexVector collocPointVector = getVectorOfCollocPoint(collocationPoints[i]);
-            ComplexVector externalField = getExternalField(complexAmplitude, waveVector, collocPointVector);
-            ComplexVector normal = new ComplexVector(normals[i][0], normals[i][1], normals[i][2]);
-            ComplexVector normalInverse = new ComplexVector(-normals[i][0], -normals[i][1], -normals[i][2]);
+            collocPointVector = getVectorOfCollocPoint(collocationPoints[i]);
+            externalField = getExternalField(complexAmplitude, waveVector, collocPointVector);
+            normal = new ComplexVector(normals[i][0], normals[i][1], normals[i][2]);
+            normalInverse = new ComplexVector(-normals[i][0], -normals[i][1], -normals[i][2]);
 
+            vecMult = ComplexVector.vecMultiply(normalInverse, externalField);
 
-            ComplexVector vecMult = ComplexVector.vecMultiply(normalInverse, externalField);
+            for (int m = 0; m < 2; m++) {
+                ii = 2 * i + m;
+                tau = new ComplexVector(tau_vectors[m][i][0], tau_vectors[m][i][1], tau_vectors[m][i][2]);
+                constant_term[ii] = ComplexVector.scalarMultiply(vecMult, tau);
+            }
 
             for (int k = 0; k < cells.length; k++) {
                 float[][] cell = cells[k];
                 float[] x = collocationPoints[i];
-                ComplexVector integral = CellIntegralCalc.cellIntegralCalculation(x, cell, eps, wave_num_complex, g, vecDim);
+                integral = cellIntegralCalculation(x, cell, eps, wave_num_complex, g, vecDim);
 
                 for (int m = 0; m < 2; m++) {
-                    int ii = 2 * i + m; // номер строки для вставки в matrix
+                    ii = 2 * i + m; // номер строки для вставки в matrix
                     for (int l = 0; l < 2; l++) {
 
-                        ComplexVector tau_l_k = new ComplexVector(tau_vectors[l][k][0], tau_vectors[l][k][1], tau_vectors[l][k][2]);
-                        ComplexVector tau_m_i = new ComplexVector(tau_vectors[m][i][0], tau_vectors[m][i][1], tau_vectors[m][i][2]);
+                        tau_l_k = new ComplexVector(tau_vectors[l][k][0], tau_vectors[l][k][1], tau_vectors[l][k][2]);
+                        tau_m_i = new ComplexVector(tau_vectors[m][i][0], tau_vectors[m][i][1], tau_vectors[m][i][2]);
 
-                        ComplexVector a = ComplexVector.vecMultiply(tau_l_k, integral);
-                        Complex R = ComplexVector.scalarMultiply(ComplexVector.vecMultiply(normal, a), tau_m_i);
+                        a = ComplexVector.vecMultiply(tau_l_k, integral);
+                        R = ComplexVector.scalarMultiply(ComplexVector.vecMultiply(normal, a), tau_m_i);
 
                         if (i == k && m == l) {
-                            R.add(new Complex(0.5f, 0.0f));
+                            R = R.add(new Complex(0.5f, 0.0f));
                         }
-                        int kk = 2 * k + l; // номер столбца для вставки в matrix
+                        kk = 2 * k + l; // номер столбца для вставки в matrix
                         this.matrix_of_coefficient[ii][kk] = R;
                     }
-                    ComplexVector tau = new ComplexVector(tau_vectors[m][i][0], tau_vectors[m][i][1], tau_vectors[m][i][2]);
-                    constant_term[ii] = ComplexVector.scalarMultiply(vecMult, tau);
                 }
             }
 
@@ -154,9 +173,9 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
         Complex imagUnit = new Complex(0.0f, 1.0f);
 
         Complex a1 = ComplexVector.scalarMultiply(waveVector, collocPointVector);
-        Complex a2 = Complex.multiply(imagUnit, a1);
+        Complex a2 = imagUnit.multiply(a1);
 
-        Complex exp = Complex.exp(a2);
+        Complex exp = a2.exp();
         return ComplexVector.multiply(exp, complexAmplitude);
 
     }
@@ -212,9 +231,9 @@ public class SystemOfLinearEquations extends AbstractExecutorService {
         double sinPhi = Math.sin(anglePhi);
         double cosPhi = Math.cos(anglePhi);
         return new ComplexVector(
-                Complex.multiply((float) -cosPhi, wave_number),
-                Complex.multiply((float) -sinPhi, wave_number),
-                new Complex()
+                wave_number.multiply(-cosPhi),
+                wave_number.multiply(-sinPhi),
+                new Complex(0,0)
         );
     }
 

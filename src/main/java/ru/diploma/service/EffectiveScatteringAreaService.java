@@ -1,9 +1,9 @@
 package ru.diploma.service;
 
+import org.apache.commons.math3.complex.Complex;
 import org.springframework.stereotype.Component;
 import ru.diploma.config.ApplicationConfig;
 import ru.diploma.config.EqConfig;
-import ru.diploma.data.complex.Complex;
 import ru.diploma.data.complex.ComplexVector;
 import ru.diploma.util.IOUtil;
 
@@ -43,7 +43,7 @@ public class EffectiveScatteringAreaService {
             sumVec.add(calcAreaForVec(tau, collocationPoint[j], currents[j], cellArea[j]));
         }
 
-        return (float) (4.0f * Math.PI * ComplexVector.scalarMultiply(sumVec, sumVec).getRe());
+        return (float) (4.0f * Math.PI * ComplexVector.scalarMultiply(sumVec, sumVec).getReal());
     }
 
     private ComplexVector calcAreaForVec(float[] directionVec, float[] collocPointVec, ComplexVector current, float area) {
@@ -57,10 +57,10 @@ public class EffectiveScatteringAreaService {
         ComplexVector collocPointVec_complex = new ComplexVector(collocPointVec[0], collocPointVec[1], collocPointVec[2]);
 
         Complex a1 = ComplexVector.scalarMultiply(directionVec_complex, collocPointVec_complex);
-        Complex a2 = Complex.multiply(Complex.multiply(imag_unit.conjugate(), k_complex), a1);
-        Complex a3 = Complex.divide(Complex.exp(a2), new Complex((float) (4.0f * Math.PI), 0.0f));
+        Complex a2 = imag_unit.conjugate().multiply(k_complex).multiply(a1);
+        Complex a3 = a2.exp().divide(new Complex((float) (4.0f * Math.PI), 0.0f));
         ComplexVector a4 = ComplexVector.vecMultiply(directionVec_complex, current);
-        ComplexVector a5 = ComplexVector.multiply(Complex.multiply(imag_unit, k_complex), a4);
+        ComplexVector a5 = ComplexVector.multiply(imag_unit.multiply(k_complex), a4);
         ComplexVector a6 = ComplexVector.multiply(area_complex, a5);
         ComplexVector a7 = ComplexVector.multiply(a3, a6);
 
